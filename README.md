@@ -73,12 +73,12 @@ Visual Studio に負けない点としては「見せ方」かなと思ってい
 
 本プログラムは、以下の環境で作成しています。
 
-|align center|align left|
-|項目|値|
-|OS|Windows 8.1 Pro (64 bit)|
-|IDE|Visual Studio Community 2015|
-|言語|VB.NET|
-|種類|WPF アプリケーション (.NET Framework 4.6)|
+| 項目 | 値                                                               |
+| ----- |:---------------------------------------------------- |
+| OS   | Windows 8.1 Pro (64 bit)                              |
+| IDE  | Visual Studio Community 2015                     |
+| 言語 | VB.NET                                                       |
+| 種類 | WPF アプリケーション (.NET Framework 4.6) |
 
 Visual Studio 標準コントロールでしか確認していないので、
 外部ベンダー提供のコントロールを使ったアプリケーションでもうまく動作するのかは未確認です。
