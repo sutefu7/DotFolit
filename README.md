@@ -98,16 +98,60 @@ Visual Studio 標準コントロールでしか確認していないので、
 
 - AvalonEdit
 
-   aaa  
-   aaa  
-   aaa
+   [https://github.com/icsharpcode/AvalonEdit](https://github.com/icsharpcode/AvalonEdit)  
+   MIT License  
 
 - AvalonDock (Extended.Wpf.Toolkit)
 
-   aaa  
-   aaa  
-   aaa
+   [https://github.com/xceedsoftware/wpftoolkit](https://github.com/xceedsoftware/wpftoolkit)  
+   Microsoft Public License (Ms-PL)  
+   著作権: Xceed Software Inc.  
 
+- Livet
 
+   [https://github.com/ugaya40/Livet](https://github.com/ugaya40/Livet)  
+   zlib/libpngライセンス  
+
+- Roslyn API 系
+
+   MICROSOFT SOFTWARE LICENSE TERMS  
+   [https://www.microsoft.com/net/dotnet_library_license.htm](https://www.microsoft.com/net/dotnet_library_license.htm)  
+   以下は、NuGet に表示される代表名称であり、実際には依存するその他 dll もたくさん付いてくる（最終的には 300 MB くらい？）  
+   Microsoft.Build  
+   Microsoft.Build.Framework  
+   Microsoft.Build.Tasks.Core  
+   Microsoft.CodeAnalysis.VisualBasic  
+   Microsoft.CodeAnalysis.Analyzers  
+   Microsoft.CodeAnalysis.VisualBasic.Workspaces  
+   もしかしたら、他にもあったかもしれない...  
+
+- ReadJEnc
+
+   [https://github.com/hnx8/ReadJEnc](https://github.com/hnx8/ReadJEnc)  
+   MIT License  
+
+- VS2013 Image Library
+
+   [https://webserver2.tecgraf.puc-rio.br/iup/en/imglib/Visual%20Studio%202013%20Image%20Library%20EULA.docx](https://webserver2.tecgraf.puc-rio.br/iup/en/imglib/Visual%20Studio%202013%20Image%20Library%20EULA.docx)  
+   Visual Studio 2013 Image Library EULA  
+
+# 謝辞
+
+無償公開しているライブラリもそうですが、他にもソースコード上に記載しているリンク先の解説サイト様方のおかげで、最低限の形まで実装することができました。
+ありがとうございました。
+
+# アプリ名の由来
+
+以下の通りです。  
+  
+   Do not forget your humility  
+   あなたの謙虚さを忘れないでください  
+   ↓  
+   混ぜたり、順序入れ替えたり  
+   ↓  
+   dotfolit  
+   どっと　ふぉりっと  
+     
+   DotFolit  
 
 
