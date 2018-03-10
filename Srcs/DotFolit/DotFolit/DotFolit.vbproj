@@ -421,9 +421,6 @@
     <Resource Include="Images\EnumItem.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="このプログラムについて.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="License\MIT-License.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
