@@ -23,6 +23,7 @@ Public Class EditorUserControl
     Private nsView As DataView = Nothing
     Private displayDefineFullName As String = String.Empty
     Private displayMethodFullName As String = String.Empty
+    Private displayArgumentsFullName As String = String.Empty
 
 #End Region
 
@@ -85,13 +86,15 @@ Public Class EditorUserControl
                 If startLength <= offset AndAlso offset <= endLength Then
 
                     defineFullName = CStr(row("DefineFullName"))
+                    Dim methodArguments = CStr(row("MethodArguments"))
                     defineKind = CStr(row("DefineKind"))
                     foundMethod = True
 
-                    If Me.displayMethodFullName = defineFullName Then
+                    If (Me.displayMethodFullName = defineFullName) AndAlso (Me.displayArgumentsFullName = methodArguments) Then
                         Exit For
                     End If
                     Me.displayMethodFullName = defineFullName
+                    Me.displayArgumentsFullName = methodArguments
 
                     Dim task1 = Task.Run(Sub()
 
@@ -112,6 +115,7 @@ Public Class EditorUserControl
 
         If Not foundMethod Then
             Me.displayMethodFullName = String.Empty
+            Me.displayArgumentsFullName = String.Empty
             Me.ClearMethodFlowChartCanvas()
         End If
 
@@ -123,6 +127,7 @@ Public Class EditorUserControl
             Me.treeview1.ItemsSource = Nothing
             Me.displayDefineFullName = String.Empty
             Me.displayMethodFullName = String.Empty
+            Me.displayArgumentsFullName = String.Empty
             Me.ClearClassInheritsCanvas()
             Me.ClearMethodFlowChartCanvas()
             Return
@@ -176,6 +181,7 @@ Public Class EditorUserControl
             Me.treeview1.ItemsSource = Nothing
             Me.displayDefineFullName = String.Empty
             Me.displayMethodFullName = String.Empty
+            Me.displayArgumentsFullName = String.Empty
             Me.ClearClassInheritsCanvas()
             Me.ClearMethodFlowChartCanvas()
             Return
@@ -194,6 +200,7 @@ Public Class EditorUserControl
             Me.treeview1.ItemsSource = Nothing
             Me.displayDefineFullName = String.Empty
             Me.displayMethodFullName = String.Empty
+            Me.displayArgumentsFullName = String.Empty
             Me.ClearClassInheritsCanvas()
             Me.ClearMethodFlowChartCanvas()
             Return

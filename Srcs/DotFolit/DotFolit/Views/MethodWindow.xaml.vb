@@ -171,6 +171,7 @@ Public Class MethodWindow
     Private Sub Caret_PositionChanged(sender As Object, e As EventArgs)
 
         Dim texteditor1 = TryCast(sender, TextEditor)
+        Dim thumb1 = TryCast(TryCast(TryCast(texteditor1.Parent, DockPanel).Parent, Border).TemplatedParent, ResizableThumb)
         Dim sourceFile = texteditor1.Document.FileName
         Dim offset = texteditor1.TextArea.Caret.Offset
 
@@ -214,7 +215,9 @@ Public Class MethodWindow
 
 
 
-
+        ' 通常はソースファイル＝vbproj ファイルがあるフォルダなのだが、
+        ' プロジェクト内にサブフォルダを作成している場合、さかのぼってフォルダパスを取得する
+        ' 「vbproj ファイルがあるフォルダ」をもとに、同じ名前空間かどうかを判断したいため
         Dim sourceDir = Path.GetDirectoryName(sourceFile)
         While True
 
@@ -234,7 +237,7 @@ Public Class MethodWindow
             Dim node = candidateTrees(0).GetRoot().DescendantNodes().FirstOrDefault(Function(x) x.ToString() = signature)
             Dim callerFile = node.SyntaxTree.FilePath
             Dim startLength = node.Span.Start
-            Me.AddNew(callerFile, startLength)
+            Me.AddNew(callerFile, startLength, thumb1)
             foundSignature = True
         End If
 
@@ -257,7 +260,7 @@ Public Class MethodWindow
                         Dim node = candidateTree.GetRoot().DescendantNodes().FirstOrDefault(Function(x) x.ToString() = signature)
                         Dim callerFile = node.SyntaxTree.FilePath
                         Dim startLength = node.Span.Start
-                        Me.AddNew(callerFile, startLength)
+                        Me.AddNew(callerFile, startLength, thumb1)
 
                         foundSignature = True
                         Exit For
@@ -280,7 +283,7 @@ Public Class MethodWindow
                     Dim node = candidateTree.GetRoot().DescendantNodes().FirstOrDefault(Function(x) x.ToString() = signature)
                     Dim callerFile = node.SyntaxTree.FilePath
                     Dim startLength = node.Span.Start
-                    Me.AddNew(callerFile, startLength)
+                    Me.AddNew(callerFile, startLength, thumb1)
 
                     foundSignature = True
                     Exit For
@@ -331,7 +334,7 @@ Public Class MethodWindow
 
 #Region "メソッド"
 
-    Private Sub AddNew(sourceFile As String, startLength As Integer)
+    Private Sub AddNew(sourceFile As String, startLength As Integer, Optional selectedThumb As ResizableThumb = Nothing)
 
         ' 表示図形の作成
         Dim newThumb = New ResizableThumb
@@ -367,7 +370,7 @@ Public Class MethodWindow
         strategy.UpdateFoldings(manager, texteditor1.Document)
 
         ' 表示位置をセット
-        Dim pos = Me.GetNewLocation()
+        Dim pos = Me.GetNewLocation(selectedThumb)
         Canvas.SetLeft(newThumb, pos.X)
         Canvas.SetTop(newThumb, pos.Y)
 
@@ -397,7 +400,7 @@ Public Class MethodWindow
 
     End Sub
 
-    Private Function GetNewLocation() As Point
+    Private Function GetNewLocation(Optional selectedThumb As ResizableThumb = Nothing) As Point
 
         ' 最も右下に位置する ResizableThumb を探す
         Dim items = Me.MethodCanvas.Children.OfType(Of ResizableThumb)()
@@ -406,7 +409,7 @@ Public Class MethodWindow
         End If
 
         ' 既に表示されている図形のうち、１つ目の図形位置を基準として、今回の図形位置を計算する
-        Dim item = items(0)
+        Dim item = If(selectedThumb Is Nothing, items(0), selectedThumb)
         Dim newWidth As Double = item.ActualWidth
         Dim newHeight As Double = item.ActualHeight
 

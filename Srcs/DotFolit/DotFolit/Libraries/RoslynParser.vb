@@ -1308,7 +1308,7 @@ Public Class RoslynParser
                 line3.SetBinding(Line.X2Property, bind3)
 
 
-            Case SyntaxKind.ForBlock, SyntaxKind.ForEachBlock, SyntaxKind.WhileBlock, SyntaxKind.SimpleDoLoopBlock, SyntaxKind.DoLoopUntilBlock, SyntaxKind.DoLoopWhileBlock
+            Case SyntaxKind.ForBlock, SyntaxKind.ForEachBlock, SyntaxKind.WhileBlock, SyntaxKind.SimpleDoLoopBlock, SyntaxKind.DoLoopUntilBlock, SyntaxKind.DoLoopWhileBlock, SyntaxKind.UsingBlock
 
                 Dim textblock1 = New TextBlock
                 itemscontrol1.Items.Add(textblock1)
@@ -1339,6 +1339,7 @@ Public Class RoslynParser
                     Case node.Kind() = SyntaxKind.SimpleDoLoopBlock : textblock2.Text = "Do-Loop"
                     Case node.Kind() = SyntaxKind.DoLoopUntilBlock : textblock2.Text = "Do-Until"
                     Case node.Kind() = SyntaxKind.DoLoopWhileBlock : textblock2.Text = "Do-While"
+                    Case node.Kind() = SyntaxKind.UsingBlock : textblock2.Text = "Using"
                 End Select
 
                 Dim line2 = New Line
@@ -1359,6 +1360,152 @@ Public Class RoslynParser
                 For Each grandChild As VisualBasicSyntaxNode In node.ChildNodes()
                     Me.GetMethodIndentShapeInternal(grandChild, itemscontrol2)
                 Next
+
+
+            Case SyntaxKind.TryBlock
+
+                Dim textblock1 = New TextBlock
+                itemscontrol1.Items.Add(textblock1)
+                textblock1.Text = "↓"
+                textblock1.Foreground = Brushes.Gainsboro
+                textblock1.Margin = New Thickness(20, 10, 20, 0)
+
+                ' Try のブロック
+                Dim border1 = New Border
+                itemscontrol1.Items.Add(border1)
+                border1.BorderBrush = Brushes.Tomato
+                border1.BorderThickness = New Thickness(1)
+                border1.Background = Brushes.Linen
+                border1.CornerRadius = New CornerRadius(8)
+                border1.Margin = New Thickness(10)
+
+                Dim dockpanel1 = New DockPanel
+                border1.Child = dockpanel1
+
+                Dim textblock2 = New TextBlock
+                dockpanel1.Children.Add(textblock2)
+                DockPanel.SetDock(textblock2, Dock.Top)   ' DockPanel は、DockPanel.SetDock(コントロール名、値)
+                textblock2.Text = "Try"
+                textblock2.Margin = New Thickness(10, 5, 10, 0)
+
+                Dim line2 = New Line
+                dockpanel1.Children.Add(line2)
+                DockPanel.SetDock(line2, Dock.Top)
+                line2.Stroke = Brushes.Gainsboro
+                line2.StrokeThickness = 1
+                line2.Margin = New Thickness(10, 0, 10, 5)
+
+                Dim bind2 = New Binding("ActualWidth")
+                bind2.RelativeSource = New RelativeSource(RelativeSourceMode.Self)
+                line2.SetBinding(Line.X2Property, bind2)
+
+                Dim itemscontrol2 = New ItemsControl
+                dockpanel1.Children.Add(itemscontrol2)
+                itemscontrol2.Margin = New Thickness(20, 0, 0, 0)
+
+                Dim innerBlocks = node.ChildNodes().Where(Function(x) (TypeOf x IsNot TryStatementSyntax) AndAlso (TypeOf x IsNot CatchBlockSyntax) AndAlso (TypeOf x IsNot FinallyBlockSyntax))
+                For Each innerBlock As VisualBasicSyntaxNode In innerBlocks
+                    Me.GetMethodIndentShapeInternal(innerBlock, itemscontrol2)
+                Next
+
+                Dim textblock3 = New TextBlock
+                itemscontrol1.Items.Add(textblock3)
+                textblock3.Text = "↓"
+                textblock3.Foreground = Brushes.Gainsboro
+                textblock3.Margin = New Thickness(20, 10, 20, 0)
+
+                ' Catch ブロック
+                If node.ChildNodes().Any(Function(x) TypeOf x Is CatchBlockSyntax) Then
+
+                    Dim innerBlocks2 = node.ChildNodes().Where(Function(x) TypeOf x Is CatchBlockSyntax)
+                    For Each innerBlock2 In innerBlocks2
+
+                        Dim border2 = New Border
+                        itemscontrol1.Items.Add(border2)
+                        border2.BorderBrush = Brushes.Tomato
+                        border2.BorderThickness = New Thickness(1)
+                        border2.Background = Brushes.Linen
+                        border2.CornerRadius = New CornerRadius(8)
+                        border2.Margin = New Thickness(10)
+
+                        Dim dockpanel2 = New DockPanel
+                        border2.Child = dockpanel2
+
+                        Dim textblock4 = New TextBlock
+                        dockpanel2.Children.Add(textblock4)
+                        DockPanel.SetDock(textblock4, Dock.Top)   ' DockPanel は、DockPanel.SetDock(コントロール名、値)
+                        textblock4.Text = "Catch"
+                        textblock4.Margin = New Thickness(10, 5, 10, 0)
+
+                        Dim line3 = New Line
+                        dockpanel2.Children.Add(line3)
+                        DockPanel.SetDock(line3, Dock.Top)
+                        line3.Stroke = Brushes.Gainsboro
+                        line3.StrokeThickness = 1
+                        line3.Margin = New Thickness(10, 0, 10, 5)
+
+                        Dim bind3 = New Binding("ActualWidth")
+                        bind3.RelativeSource = New RelativeSource(RelativeSourceMode.Self)
+                        line3.SetBinding(Line.X2Property, bind3)
+
+                        Dim itemscontrol3 = New ItemsControl
+                        dockpanel2.Children.Add(itemscontrol3)
+                        itemscontrol3.Margin = New Thickness(20, 0, 0, 0)
+
+                        For Each inner As VisualBasicSyntaxNode In innerBlock2.ChildNodes()
+                            Me.GetMethodIndentShapeInternal(inner, itemscontrol3)
+                        Next
+
+                        Dim textblock5 = New TextBlock
+                        itemscontrol1.Items.Add(textblock5)
+                        textblock5.Text = "↓"
+                        textblock5.Foreground = Brushes.Gainsboro
+                        textblock5.Margin = New Thickness(20, 10, 20, 0)
+
+                    Next
+
+                End If
+
+                ' Finally ブロック
+                If node.ChildNodes().Any(Function(x) TypeOf x Is FinallyBlockSyntax) Then
+
+                    Dim innerBlocks2 = node.ChildNodes().Where(Function(x) TypeOf x Is FinallyBlockSyntax)
+                    For Each innerBlock2 In innerBlocks2
+
+                        Dim border2 = New Border
+                        itemscontrol1.Items.Add(border2)
+                        border2.BorderBrush = Brushes.Tomato
+                        border2.BorderThickness = New Thickness(1)
+                        border2.Background = Brushes.Linen
+                        border2.CornerRadius = New CornerRadius(8)
+                        border2.Margin = New Thickness(10)
+
+                        Dim dockpanel2 = New DockPanel
+                        border2.Child = dockpanel2
+
+                        Dim textblock4 = New TextBlock
+                        dockpanel2.Children.Add(textblock4)
+                        DockPanel.SetDock(textblock4, Dock.Top)   ' DockPanel は、DockPanel.SetDock(コントロール名、値)
+                        textblock4.Text = "Finally"
+                        textblock4.Margin = New Thickness(10, 5, 10, 0)
+
+                        Dim itemscontrol3 = New ItemsControl
+                        dockpanel2.Children.Add(itemscontrol3)
+                        itemscontrol3.Margin = New Thickness(20, 0, 0, 0)
+
+                        For Each inner As VisualBasicSyntaxNode In innerBlock2.ChildNodes()
+                            Me.GetMethodIndentShapeInternal(inner, itemscontrol3)
+                        Next
+
+                        Dim textblock5 = New TextBlock
+                        itemscontrol1.Items.Add(textblock5)
+                        textblock5.Text = "↓"
+                        textblock5.Foreground = Brushes.Gainsboro
+                        textblock5.Margin = New Thickness(20, 10, 20, 0)
+
+                    Next
+
+                End If
 
 
             Case Else
