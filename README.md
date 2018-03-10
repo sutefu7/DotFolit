@@ -98,15 +98,15 @@ Visual Studio 標準コントロールでしか確認していないので、
 
 - AvalonEdit
 
-⋅⋅⋅aaa⋅⋅
-⋅⋅⋅aaa⋅⋅
-⋅⋅⋅aaa
+   aaa  
+   aaa  
+   aaa
 
 - AvalonDock (Extended.Wpf.Toolkit)
 
-⋅⋅⋅aaa⋅⋅
-⋅⋅⋅aaa⋅⋅
-⋅⋅⋅aaa
+   aaa  
+   aaa  
+   aaa
 
 
 
