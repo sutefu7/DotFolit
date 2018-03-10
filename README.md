@@ -97,9 +97,17 @@ Visual Studio 標準コントロールでしか確認していないので、
 詳しくは、ライブラリ作成者様のホームページ、または GitHub をご参照ください。
 
 - AvalonEdit
-aaa
+
+⋅⋅⋅aaa
+⋅⋅⋅aaa
+⋅⋅⋅aaa
 
 - AvalonDock (Extended.Wpf.Toolkit)
-bbb
+
+⋅⋅⋅aaa
+⋅⋅⋅aaa
+⋅⋅⋅aaa
+
+
 
 
