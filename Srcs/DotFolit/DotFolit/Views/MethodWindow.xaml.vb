@@ -14,121 +14,30 @@ Imports Microsoft.CodeAnalysis.VisualBasic
 Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 Imports Microsoft.CodeAnalysis.FindSymbols
 
+Imports DotFolit.Petzold.Media2D
+
 
 Public Class MethodWindow
 
 #Region "フィールド、プロパティ"
 
-    Public Property SolutionModel As TreeViewItemModel = Nothing
-    Public Property SourceModel As TreeViewItemModel = Nothing
-
-    Private CurrentCompilation As VisualBasicCompilation = Nothing
-    Private TreeItems As List(Of SyntaxTree) = Nothing
-
-    Private CallerSourceFile As String = String.Empty
-    Private CallerStartLength As Integer = -1
+    Public Property StartSourceFile As String = String.Empty
 
 #End Region
 
 #Region "画面のロード"
 
-    Private Async Sub Window_Loaded(sender As Object, e As RoutedEventArgs)
+    Private Sub Window_Loaded(sender As Object, e As RoutedEventArgs)
 
-        Await Me.InitializeModel()
+        Me.AddNew(Me.StartSourceFile, 0)
 
     End Sub
-
-    Private Async Function InitializeModel() As Task
-
-        ' 本来は MainWindow.xaml.vb 側の D&D 時に１回だけでやるべきだったかも
-        ' 画面表示するたびに全読み込みするのは富豪プログラミングすぎたかも
-
-        Dim task1 = Task.Run(Sub()
-
-                                 Dim dllItems = New List(Of MetadataReference)
-                                 Dim srcItems = New List(Of SyntaxTree)
-
-                                 Try
-
-                                     Dim solutionFile = Me.SolutionModel.FileName
-                                     Dim msWorkspace = MSBuildWorkspace.Create()
-                                     Dim solution = msWorkspace.OpenSolutionAsync(solutionFile).Result
-
-                                     ' プロジェクト数分
-                                     For Each project In solution.Projects
-
-                                         ' 参照dll
-                                         For Each metaRef In project.MetadataReferences
-
-                                             If Not dllItems.Any(Function(x) x.Display = metaRef.Display) Then
-                                                 dllItems.Add(MetadataReference.CreateFromFile(metaRef.Display))
-                                             End If
-
-                                         Next
-
-                                         ' ソース
-                                         For Each document In project.Documents
-
-                                             Dim source = File.ReadAllText(document.FilePath, EncodeResolver.GetEncoding(document.FilePath))
-                                             Dim tree = VisualBasicSyntaxTree.ParseText(source,, document.FilePath)
-                                             srcItems.Add(tree)
-
-                                         Next
-
-                                         ' アセンブリファイル
-                                         If Not dllItems.Any(Function(x) x.Display = project.OutputFilePath) Then
-                                             dllItems.Add(MetadataReference.CreateFromFile(project.OutputFilePath))
-                                         End If
-
-                                     Next
-
-
-                                 Catch ex As ReflectionTypeLoadException
-
-                                     Console.WriteLine(ex.ToString())
-
-                                     For Each inner In ex.LoaderExceptions
-                                         Console.WriteLine(inner.ToString())
-                                     Next
-
-                                 Catch ex As Exception
-                                     Console.WriteLine(ex.ToString())
-                                 End Try
-
-                                 Dim compilation = VisualBasicCompilation.Create("MyCompilation", srcItems, dllItems)
-
-                                 ' クラス内からアクセス出来るようにセット
-                                 Me.CurrentCompilation = compilation
-                                 Me.TreeItems = srcItems
-
-                                 Me.Dispatcher.BeginInvoke(Sub()
-
-                                                               Dim sourceFile = SourceModel.FileName
-                                                               Me.AddNew(sourceFile, 0)
-
-                                                           End Sub)
-
-                             End Sub)
-
-
-        Dim dlg = New ProgressWindow
-        dlg.Owner = Me
-        dlg.Topmost = True
-        dlg.ShowActivated = True
-        dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner
-        Await Task.Run(Sub() Me.Dispatcher.BeginInvoke(Sub() dlg.ShowDialog()))
-
-        ' 表示処理が完了するまで待機
-        Await task1
-
-        dlg.Close()
-
-
-    End Function
 
 #End Region
 
 #Region "Thumb コントロールのドラッグアンドドロップ移動イベント"
+
+    ' なんで、あらぶるんだろう？
 
     Private Sub Thumb_DragDelta(sender As Object, e As DragDeltaEventArgs)
 
@@ -168,19 +77,41 @@ Public Class MethodWindow
 
 #Region "エディタのキャレット位置移動"
 
-    Private Sub Caret_PositionChanged(sender As Object, e As EventArgs)
+    Private Async Sub Caret_PositionChanged(sender As Object, e As EventArgs)
 
         Dim texteditor1 = TryCast(sender, TextEditor)
         Dim thumb1 = TryCast(TryCast(TryCast(texteditor1.Parent, DockPanel).Parent, Border).TemplatedParent, ResizableThumb)
         Dim sourceFile = texteditor1.Document.FileName
         Dim offset = texteditor1.TextArea.Caret.Offset
 
-        Dim sourceTree = Me.TreeItems.FirstOrDefault(Function(x) x.FilePath = sourceFile)
-        Dim model = Me.CurrentCompilation.GetSemanticModel(sourceTree)
-        Dim si = SymbolFinder.FindSymbolAtPositionAsync(model, offset, MSBuildWorkspace.Create()).Result
+        Dim sourceTree = MemoryDB.Instance.SyntaxTreeItems.FirstOrDefault(Function(x) x.FilePath = sourceFile)
+        Dim model = MemoryDB.Instance.CompilationItem.GetSemanticModel(sourceTree)
+        Dim si As ISymbol = Nothing
+
+        Try
+
+            si = Await SymbolFinder.FindSymbolAtPositionAsync(model, offset, MSBuildWorkspace.Create())
+
+        Catch ex As AggregateException
+
+            Dim idx = 0
+            For Each inner In ex.Flatten().InnerExceptions
+
+                idx += 1
+                Debug.WriteLine($"{idx} つ目 --------------------------------------")
+                Debug.WriteLine(inner.ToString())
+                Debug.WriteLine($"------------------------------------------------")
+                Debug.WriteLine("")
+
+            Next
+
+
+        Catch ex As Exception
+            Debug.WriteLine(ex.ToString())
+        End Try
 
         If si Is Nothing Then
-            Console.WriteLine("not found")
+            Debug.WriteLine("not found")
             Return
         End If
 
@@ -229,7 +160,7 @@ Public Class MethodWindow
         End While
 
         Dim signature = si.ToString()
-        Dim candidateTrees = Me.TreeItems.Where(Function(x) x.GetRoot().DescendantNodes().Any(Function(y) y.ToString() = signature))
+        Dim candidateTrees = MemoryDB.Instance.SyntaxTreeItems.Where(Function(x) x.GetRoot().DescendantNodes().Any(Function(y) y.ToString() = signature))
         Dim foundSignature = False
 
         If candidateTrees.Count() = 1 Then
@@ -298,7 +229,9 @@ Public Class MethodWindow
             Return
         End If
 
-        ' TODO, コネクタ接続
+
+
+
 
 
     End Sub
@@ -343,18 +276,37 @@ Public Class MethodWindow
         newThumb.ApplyTemplate()
         newThumb.UpdateLayout()
 
+        ' ソース全体が長すぎると見づらい、探しづらい、理解しづらい
+        ' 仮対応として固定サイズで表示する。見づらかったらリサイズしてもらう運用の方が、まだマシと判断
+        newThumb.Width = 640
+        newThumb.Height = 480
+
         ' タイトルをセット 
         Dim textblock1 = TryCast(newThumb.Template.FindName("textblock1", newThumb), TextBlock)
-        'textblock1.Text = $"{Path.GetFileName(sourceFile)}"
-        textblock1.Text = $"{sourceFile}"
+        textblock1.Text = $"{Path.GetFileName(sourceFile)}"
+
+        ' 調査用
+        'textblock1.Text = $"{sourceFile}"      
 
         ' ソースをセット
         Dim texteditor1 = TryCast(newThumb.Template.FindName("texteditor1", newThumb), TextEditor)
         texteditor1.Document.Text = File.ReadAllText(sourceFile, EncodeResolver.GetEncoding(sourceFile))
         texteditor1.Document.FileName = sourceFile
 
+        ' キャレット位置を、メンバー定義位置へ移動
+        texteditor1.TextArea.Caret.Offset = startLength
+
         ' メンバー定義位置が見えるようにスクロール
+        ' （いまいちうまく扱えないスクロール処理
+        ' EditorUserControl.xaml.vb/treeview1_SelectedItemChanged メソッドに書いたやり方と同じだと、うまくいかない
+        ' TextEditor.ScrollToVerticalOffset メソッドと、TextEditor.ScrollToLine メソッドの組み合わせで、うまくスクロールしてくれた）
+        texteditor1.ScrollToVerticalOffset(startLength)
+
+        ' メソッド定義の開始行が見やすいように、２行分上に表示する
         Dim jumpLine = texteditor1.Document.GetLineByOffset(startLength).LineNumber
+        If 0 <= jumpLine - 2 Then
+            jumpLine -= 2
+        End If
         texteditor1.ScrollToLine(jumpLine)
 
         ' XAML 上で設定していない部分の設定
@@ -379,7 +331,8 @@ Public Class MethodWindow
         'AddHandler texteditor1.TextArea.Caret.PositionChanged, AddressOf Me.Caret_PositionChanged
         AddHandler texteditor1.TextArea.Caret.PositionChanged, Sub(sender, e)
 
-                                                                   ' 通常のままだと texteditor1 コントロールが取得できないので、イベントハンドラをトラップして、渡してしまう
+                                                                   ' 通常のままだと Caret コントロールが渡されてくるのだが、ここから texteditor1 コントロールへさかのぼることが出来ない
+                                                                   ' texteditor1 コントロールを取得したいので、イベントハンドラをトラップして、渡してしまう
                                                                    sender = texteditor1
                                                                    Me.Caret_PositionChanged(sender, e)
 
@@ -391,12 +344,30 @@ Public Class MethodWindow
         ' キャンバスに登録
         Me.MethodCanvas.Children.Add(newThumb)
 
-        ' TODO, コネクタの接続
+        ' コネクタの接続
+        ' 矢印線でつながれていると、呼び出し元、呼び出し先が分かりやすいのだが、不要か？
+        If selectedThumb Is Nothing Then
+            Return
+        End If
 
+        ' 前回と今回の図形同士を、矢印線でつなげる
+        Dim arrow = New ArrowLine
+        arrow.Stroke = Brushes.Green
+        arrow.StrokeThickness = 1
+        MethodCanvas.Children.Add(arrow)
 
+        selectedThumb.StartLines.Add(arrow)
+        newThumb.EndLines.Add(arrow)
 
+        Me.UpdateLineLocation(selectedThumb)
+        Me.UpdateLineLocation(newThumb)
 
-
+        ' なぜか、最後の図形だけ、矢印線が左上の角を指してしまう不具合
+        ' → ActualWidth, ActualHeight が 0 だから。いったん画面表示させないとダメか？
+        ' → Measure メソッドを呼び出して、希望サイズを更新する。こちらで矢印線の位置を調整する
+        Dim newSize = New Size(MethodCanvas.ActualWidth, MethodCanvas.ActualHeight)
+        MethodCanvas.Measure(newSize)
+        Me.UpdateLineLocation(newThumb)
 
     End Sub
 

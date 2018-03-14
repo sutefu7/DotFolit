@@ -25,10 +25,6 @@
                 <MenuItem Header="ファイルを開く ... (_O)" Click="MenuItem_Click" />
             </MenuItem>
         </Menu>
-
-        <!--<StatusBar DockPanel.Dock="Bottom">
-            <TextBlock Text="textblock1" />
-        </StatusBar>-->
         
         <dock:DockingManager>
             <dock:LayoutRoot>
@@ -73,14 +69,10 @@
                                        
                                         <HierarchicalDataTemplate.Triggers>
 
-                                            <MultiDataTrigger>
-                                                <MultiDataTrigger.Conditions>
-                                                    <!--<Condition Binding="{Binding IsExpanded}" Value="False" />-->
-                                                    <Condition Binding="{Binding TreeNodeKind, Converter={StaticResource TreeNodeKindsToStringConverter}}" Value="SourceNode" />
-                                                </MultiDataTrigger.Conditions>
+                                            <DataTrigger Binding="{Binding TreeNodeKind, Converter={StaticResource TreeNodeKindsToStringConverter}}" Value="SourceNode">
                                                 <Setter TargetName="TreeViewItemContextMenu" Property="Visibility" Value="Visible" />
-                                            </MultiDataTrigger>
-
+                                            </DataTrigger>
+                                            
                                             <MultiDataTrigger>
                                                 <MultiDataTrigger.Conditions>
                                                     <Condition Binding="{Binding IsExpanded}" Value="True" />

@@ -9,6 +9,12 @@ Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 ' 本来は、VisualBasicSyntaxWalker クラスを継承して、各ノードやトークンなどを回りながら、やりたい事をする。というやり方みたい
 ' 以下は、それの自前実装みたいなことをしている
 
+' SyntaxTree の階層構造や種類を理解するには、
+' Visual Studio の Syntax Visualizer を見るか、
+' 以前私が作成した、https://github.com/sutefu7/RoslynTest にソース表示してみるか、することで、
+' ソース構造がツリー形式で表示されるので、こちらと比較しながら見た方が、Roslyn を理解できるのではないかと思います。
+
+
 
 Public Class RoslynParser
 

@@ -1,4 +1,6 @@
 ﻿Imports System.Data
+Imports Microsoft.CodeAnalysis
+Imports Microsoft.CodeAnalysis.VisualBasic
 
 
 Public NotInheritable Class MemoryDB
@@ -30,6 +32,9 @@ Public NotInheritable Class MemoryDB
 #Region "フィールド、プロパティ"
 
     Public Property DB As DataSet = Nothing
+    Public Property SyntaxTreeItems As List(Of SyntaxTree) = Nothing
+    Public Property CompilationItem As VisualBasicCompilation = Nothing
+
 
 #End Region
 

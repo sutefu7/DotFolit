@@ -21,9 +21,13 @@ Public Class EditorUserControl
 #Region "フィールド、プロパティ"
 
     Private nsView As DataView = Nothing
+
     Private displayDefineFullName As String = String.Empty
     Private displayMethodFullName As String = String.Empty
     Private displayArgumentsFullName As String = String.Empty
+
+    Private ClassCache As Dictionary(Of String, UIElement()) = Nothing
+    Private MethodCache As Dictionary(Of Tuple(Of String, String), Border) = Nothing
 
 #End Region
 
@@ -85,8 +89,8 @@ Public Class EditorUserControl
 
                 If startLength <= offset AndAlso offset <= endLength Then
 
-                    defineFullName = CStr(row("DefineFullName"))
                     Dim methodArguments = CStr(row("MethodArguments"))
+                    defineFullName = CStr(row("DefineFullName"))
                     defineKind = CStr(row("DefineKind"))
                     foundMethod = True
 
@@ -100,7 +104,7 @@ Public Class EditorUserControl
 
                                              Me.Dispatcher.BeginInvoke(Sub()
 
-                                                                           Me.AddMethodFlowChartCanvas(defineFullName, startLength, endLength)
+                                                                           Me.AddMethodFlowChartCanvas(defineFullName, methodArguments, startLength, endLength)
 
                                                                        End Sub)
 
@@ -1322,33 +1326,60 @@ Public Class EditorUserControl
             Return
         End If
 
-        ' ターゲットクラスと、その継承元クラス全ての Type を取得
-        Dim items = New List(Of Type)
-        Dim classType = Me.GetTypeFromAllAssemblies(defineFullName)
-        If classType Is Nothing Then
-            Return
+        ' 以前作成済みのキャッシュデータがあれば、こちらを再利用する
+        If Me.ClassCache Is Nothing Then
+            Me.ClassCache = New Dictionary(Of String, UIElement())
         End If
 
-        ' 継承元クラスは、都度前に追加していく（キャンバスの表示順となる）
-        items.Add(classType)
-        Dim baseType As Type = classType.BaseType
-        While True
+        Dim cacheDatas As UIElement() = Nothing
+        If Me.ClassCache.TryGetValue(defineFullName, cacheDatas) Then
+            ' キャッシュデータをそのまま利用する
 
-            If baseType Is Nothing Then
-                Exit While
+            Dim inheritsCanvas = parentWindow.InheritsCanvas
+            inheritsCanvas.Children.Clear()
+
+            For Each cacheData As UIElement In cacheDatas
+                inheritsCanvas.Children.Add(cacheData)
+            Next
+
+        Else
+            ' 新規データを作成して、キャッシュしておく
+
+            ' ターゲットクラスと、その継承元クラス全ての Type を取得
+            Dim items = New List(Of Type)
+            Dim classType = Me.GetTypeFromAllAssemblies(defineFullName)
+            If classType Is Nothing Then
+                Return
             End If
 
-            items.Insert(0, baseType)
-            baseType = baseType.BaseType
+            ' 継承元クラスは、都度前に追加していく（キャンバスの表示順となる）
+            items.Add(classType)
+            Dim baseType As Type = classType.BaseType
+            While True
 
-        End While
+                If baseType Is Nothing Then
+                    Exit While
+                End If
 
-        Dim inheritsCanvas = parentWindow.InheritsCanvas
-        inheritsCanvas.Children.Clear()
+                items.Insert(0, baseType)
+                baseType = baseType.BaseType
 
-        For Each item In items
-            Me.AddClassInheritsCanvasInternal(inheritsCanvas, item, (item IsNot classType))
-        Next
+            End While
+
+            Dim inheritsCanvas = parentWindow.InheritsCanvas
+            inheritsCanvas.Children.Clear()
+
+            For Each item In items
+                Me.AddClassInheritsCanvasInternal(inheritsCanvas, item, (item IsNot classType))
+            Next
+
+            ' キャッシュしておく
+            ' 参照コピーではダメみたいなので、インスタンスの複製の方のコピーでキャッシュ
+            ReDim cacheDatas(inheritsCanvas.Children.Count - 1)
+            inheritsCanvas.Children.CopyTo(cacheDatas, 0)
+            Me.ClassCache.Add(defineFullName, cacheDatas)
+
+        End If
 
     End Sub
 
@@ -1820,13 +1851,28 @@ Public Class EditorUserControl
 
     End Sub
 
-    Private Sub AddMethodFlowChartCanvas(defineFullName As String, startLength As Integer, endLength As Integer)
+    Private Sub AddMethodFlowChartCanvas(defineFullName As String, methodArguments As String, startLength As Integer, endLength As Integer)
 
-        Dim methodRange = Me.texteditor1.Text.Substring(startLength, endLength - startLength)
+        ' 以前作成済みのキャッシュデータがあれば、こちらを再利用する
+        If Me.MethodCache Is Nothing Then
+            Me.MethodCache = New Dictionary(Of Tuple(Of String, String), Border)
+        End If
 
-        ' RoslynParser
-        Dim parser = New RoslynParser
-        Dim border1 = parser.GetMethodIndentShape(methodRange)
+        Dim cacheData As Border = Nothing
+        If Me.MethodCache.TryGetValue(Tuple.Create(defineFullName, methodArguments), cacheData) Then
+            ' キャッシュデータをそのまま利用する
+        Else
+            ' 新規データを作成して、キャッシュしておく
+
+            Dim methodRange = Me.texteditor1.Text.Substring(startLength, endLength - startLength)
+            Dim parser = New RoslynParser
+            Dim border1 = parser.GetMethodIndentShape(methodRange)
+
+            ' キャッシュしておく
+            cacheData = border1
+            Me.MethodCache.Add(Tuple.Create(defineFullName, methodArguments), cacheData)
+
+        End If
 
         Dim parentWindow = TryCast(Window.GetWindow(Me), MainWindow)
         If parentWindow Is Nothing Then
@@ -1835,7 +1881,7 @@ Public Class EditorUserControl
 
         Dim flowChartCanvas = parentWindow.FlowChartCanvas
         flowChartCanvas.Children.Clear()
-        flowChartCanvas.Children.Add(border1)
+        flowChartCanvas.Children.Add(cacheData)
 
         ' 初期表示範囲が、左上の隅から少し右下にずれてしまう現象の対応
         Dim scrollviewer1 = TryCast(flowChartCanvas.Parent, ScrollViewer)
@@ -1931,31 +1977,6 @@ Public Class EditorUserControl
         End If
 
     End Sub
-
-#End Region
-
-#Region "メソッドの追跡...コンテキストメニューのクリック→MainWindow.xaml.vb へ移動"
-
-    'Private Sub TreeViewItemMenuItem_Click(sender As Object, e As RoutedEventArgs)
-
-    '    Dim model = TryCast(Me.treeview1.SelectedItem, TreeViewItemModel)
-    '    If model Is Nothing Then
-    '        Return
-    '    End If
-
-    '    Dim dlg = New MethodWindow
-    '    dlg.StartModel = model
-
-    '    Dim parentWindow = TryCast(Window.GetWindow(Me), MainWindow)
-    '    If parentWindow IsNot Nothing Then
-    '        dlg.Owner = parentWindow
-    '        dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner
-    '    End If
-
-    '    dlg.ShowDialog()
-    '    dlg = Nothing
-
-    'End Sub
 
 #End Region
 

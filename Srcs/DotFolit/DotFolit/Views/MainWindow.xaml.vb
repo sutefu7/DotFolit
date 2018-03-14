@@ -5,8 +5,15 @@ Imports System.Reflection
 Imports Microsoft.Win32
 Imports System.ComponentModel
 Imports System.Windows.Controls.Primitives
+
 Imports Xceed.Wpf.AvalonDock
 Imports Xceed.Wpf.AvalonDock.Layout
+
+Imports Microsoft.CodeAnalysis
+Imports Microsoft.CodeAnalysis.MSBuild
+Imports Microsoft.CodeAnalysis.VisualBasic
+Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
+Imports Microsoft.CodeAnalysis.FindSymbols
 
 
 Class MainWindow
@@ -114,6 +121,66 @@ Class MainWindow
 
                              End Sub)
 
+        ' メソッドの追跡画面用に、このタイミングで読み込んでおく
+        Dim task2 = Task.Run(Sub()
+
+                                 Dim dllItems = New List(Of MetadataReference)
+                                 Dim srcItems = New List(Of SyntaxTree)
+
+                                 Try
+
+                                     Dim msWorkspace = MSBuildWorkspace.Create()
+                                     Dim solution = msWorkspace.OpenSolutionAsync(solutionFile).Result
+
+                                     ' プロジェクト数分
+                                     For Each project In solution.Projects
+
+                                         ' 参照dll
+                                         For Each metaRef In project.MetadataReferences
+
+                                             If Not dllItems.Any(Function(x) x.Display = metaRef.Display) Then
+                                                 dllItems.Add(MetadataReference.CreateFromFile(metaRef.Display))
+                                             End If
+
+                                         Next
+
+                                         ' ソース
+                                         For Each document In project.Documents
+
+                                             Dim source = File.ReadAllText(document.FilePath, EncodeResolver.GetEncoding(document.FilePath))
+                                             Dim tree = VisualBasicSyntaxTree.ParseText(source,, document.FilePath)
+                                             srcItems.Add(tree)
+
+                                         Next
+
+                                         ' アセンブリファイル
+                                         If Not dllItems.Any(Function(x) x.Display = project.OutputFilePath) Then
+                                             dllItems.Add(MetadataReference.CreateFromFile(project.OutputFilePath))
+                                         End If
+
+                                     Next
+
+
+                                 Catch ex As ReflectionTypeLoadException
+
+                                     Console.WriteLine(ex.ToString())
+
+                                     For Each inner In ex.LoaderExceptions
+                                         Console.WriteLine(inner.ToString())
+                                     Next
+
+                                 Catch ex As Exception
+                                     Console.WriteLine(ex.ToString())
+                                 End Try
+
+                                 Dim compilation = VisualBasicCompilation.Create("MyCompilation", srcItems, dllItems)
+
+                                 ' MethodWindow.xaml.vb からアクセスできるようにセット
+                                 MemoryDB.Instance.SyntaxTreeItems = srcItems
+                                 MemoryDB.Instance.CompilationItem = compilation
+
+                             End Sub)
+
         ' 処理中は、進捗状況画面を表示する（進捗状況は、具体的ではなく、応答なしではないことをユーザーに伝える程度）
         Me.Activate()
 
@@ -125,7 +192,7 @@ Class MainWindow
         Await Task.Run(Sub() Me.Dispatcher.BeginInvoke(Sub() dlg.ShowDialog()))
 
         ' 解析＆ツリー表示処理が完了するまで待機
-        Await task1
+        Await Task.WhenAll(task1, task2)
 
         dlg.Close()
 
@@ -251,10 +318,6 @@ Class MainWindow
         Return solutionModel
 
     End Function
-
-    'Private Iterator Function CreateSolutionTreeDataInternal(solutionFile As String) As IEnumerable(Of TreeViewItemModel)
-
-    'End Function
 
 #End Region
 
@@ -471,19 +534,8 @@ Class MainWindow
             Return
         End If
 
-        Dim solutionModel As TreeViewItemModel = model.Parent
-        While True
-
-            If solutionModel.TreeNodeKind = TreeNodeKinds.SolutionNode Then
-                Exit While
-            End If
-            solutionModel = solutionModel.Parent
-
-        End While
-
         Dim dlg = New MethodWindow
-        dlg.SolutionModel = solutionModel
-        dlg.SourceModel = model
+        dlg.StartSourceFile = model.FileName
 
         Dim parentWindow = TryCast(Window.GetWindow(Me), MainWindow)
         If parentWindow IsNot Nothing Then
@@ -495,18 +547,6 @@ Class MainWindow
         dlg = Nothing
 
     End Sub
-
-#End Region
-
-#Region ""
-
-#End Region
-
-#Region ""
-
-#End Region
-
-#Region ""
 
 #End Region
 
