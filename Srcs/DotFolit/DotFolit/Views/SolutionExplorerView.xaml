@@ -1,0 +1,134 @@
+﻿<UserControl x:Class="SolutionExplorerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DotFolit"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+             xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+
+        <local:TreeNodeKindsToImageConverter x:Key="TreeNodeKindsToImageConverter" />
+        <local:TreeNodeKindsToStringConverter x:Key="TreeNodeKindsToStringConverter" />
+
+    </UserControl.Resources>
+    
+    <i:Interaction.Triggers>
+
+        <!-- 進捗画面をモーダル形式で表示するように設定 -->
+        <l:InteractionMessageTrigger Messenger="{Binding Messenger}" MessageKey="ShowProgressView">
+            <l:TransitionInteractionMessageAction WindowType="{x:Type local:ProgressView}" Mode="Modal" />
+        </l:InteractionMessageTrigger>
+
+        <!-- メソッド追跡画面をモーダル形式で表示するように設定 -->
+        <l:InteractionMessageTrigger Messenger="{Binding Messenger}" MessageKey="ShowMethodView">
+            <l:TransitionInteractionMessageAction WindowType="{x:Type local:MethodView}" Mode="Modal" />
+        </l:InteractionMessageTrigger>
+        
+    </i:Interaction.Triggers>
+    
+    <Grid>
+
+        <TreeView
+            Name="SolutionTree" 
+            ItemsSource="{Binding TreeItems}"
+            VirtualizingStackPanel.IsVirtualizing="True"
+            VirtualizingStackPanel.VirtualizationMode="Recycling">
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectedItemChanged">
+                    <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="SolutionTree_SelectedItemChanged" MethodParameter="{Binding ElementName=SolutionTree, Path=SelectedItem}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
+            <TreeView.Resources>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                    <!-- 右クリック→コンテキストメニュー表示の際、ノードが選択された状態になってほしいため、コードビハインドにイベントハンドラを記載している -->
+                    <EventSetter Event="TreeViewItem.MouseRightButtonDown" Handler="TreeViewItem_MouseRightButtonDown" />
+                </Style>
+            </TreeView.Resources>
+
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type local:TreeViewItemModel}" ItemsSource="{Binding Children}">
+                    
+                    <!-- 
+                    MenuItem の Click イベントに対応する LivetCallMethodAction で、MethodTarget プロパティが解決できない不具合の対応
+                    特に何もしなければ、MenuItem.DataContext は TreeViewItemModel になっている
+                    UserControl.DataContext の SolutionExplorerViewModel を対象にしたい
+                    FindAncestor で UserControl までさかのぼっても（そもそも、さかのぼれたのか？）発見できなかった
+                    
+                    WPF MVVM bind command to treeview context menu
+                    https://stackoverflow.com/questions/45768607/wpf-mvvm-bind-command-to-treeview-context-menu
+                    
+                    対応として、Tag プロパティに UserControl にバインドしているビューモデルを渡しておき、そちら経由で発見させるように修正
+                    
+                    -->
+                    <StackPanel Orientation="Horizontal" Tag="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}">
+
+                        <Image Name="NodeImage" Source="{Binding TreeNodeKind, Converter={StaticResource TreeNodeKindsToImageConverter}}" Margin="0,0,5,0" />
+                        <TextBlock Text="{Binding Text}" />
+
+                        <!-- 全ノードに、コンテキストメニューを登録するが非表示にしておく -->
+                        <!-- 
+                        TODO
+                        ソリューションノード用のメニュー項目、プロジェクトノード用のメニュー項目を出したくなった場合、
+                        全部メニュー項目を登録しておき、トリガー別に、表示・非表示の切り替えをしてごまかす
+                        -->
+                        <StackPanel.ContextMenu>
+                            <ContextMenu Name="MethodSearchContextMenu" Visibility="Collapsed">
+                                <MenuItem Header="メソッドの追跡...">
+
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="Click">
+                                            
+                                            <!-- MethodParameter に渡している {Binding} は、右クリックした選択ノードに対応する TreeViewItemModel データとなる -->
+                                            <l:LivetCallMethodAction 
+                                                MethodTarget="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.Tag.DataContext}" 
+                                                MethodName="MethodSearchMenuItem_Click" 
+                                                MethodParameter="{Binding}" />
+                                            
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+
+                                </MenuItem>
+                            </ContextMenu>
+                        </StackPanel.ContextMenu>
+
+                    </StackPanel>
+
+                    <HierarchicalDataTemplate.Triggers>
+
+                        <!-- ソースノード、または自動生成ソースノードの場合、コンテキストメニューを表示するように設定 -->
+                        <DataTrigger Binding="{Binding TreeNodeKind, Converter={StaticResource TreeNodeKindsToStringConverter}}" Value="SourceNode">
+                            <Setter TargetName="MethodSearchContextMenu" Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding TreeNodeKind, Converter={StaticResource TreeNodeKindsToStringConverter}}" Value="GeneratedFileNode">
+                            <Setter TargetName="MethodSearchContextMenu" Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+
+                        <!-- フォルダを展開したら、開かれたフォルダの画像に変える -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsExpanded}" Value="True" />
+                                <Condition Binding="{Binding TreeNodeKind, Converter={StaticResource TreeNodeKindsToStringConverter}}" Value="FolderNode" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter TargetName="NodeImage" Property="Source" Value="/Images/Folder_Expand.png" />
+                        </MultiDataTrigger>
+
+                    </HierarchicalDataTemplate.Triggers>
+                    
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+            
+        </TreeView>
+
+    </Grid>
+    
+</UserControl>

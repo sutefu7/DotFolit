@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E6EDCAE2-7511-4AB6-B24F-96FBBED71056}</ProjectGuid>
+    <ProjectGuid>{4DCED009-FFEE-438E-8641-2537559B4238}</ProjectGuid>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{F184B08F-C81C-45F6-A57F-5ABD9991F28F}</ProjectTypeGuids>
     <OutputType>WinExe</OutputType>
     <RootNamespace>DotFolit</RootNamespace>
@@ -49,6 +49,10 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GongSolutions.Wpf.DragDrop, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\gong-wpf-dragdrop.1.1.0\lib\net46\GongSolutions.Wpf.DragDrop.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Hnx8.ReadJEnc, Version=1.3.0.821, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ReadJEnc.1.3.0.0821\lib\net\Hnx8.ReadJEnc.dll</HintPath>
       <Private>True</Private>
@@ -117,8 +121,8 @@
       <HintPath>..\packages\System.AppContext.4.3.0\lib\net46\System.AppContext.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Collections.Immutable, Version=1.2.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Collections.Immutable.1.4.0\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+    <Reference Include="System.Collections.Immutable, Version=1.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Collections.Immutable.1.3.1\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
@@ -172,8 +176,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Reflection.Metadata, Version=1.4.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Reflection.Metadata.1.5.0\lib\portable-net45+win8\System.Reflection.Metadata.dll</HintPath>
+    <Reference Include="System.Reflection.Metadata, Version=1.4.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reflection.Metadata.1.4.2\lib\portable-net45+win8\System.Reflection.Metadata.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -181,7 +185,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Security.Cryptography.Algorithms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.1\lib\net46\System.Security.Cryptography.Algorithms.dll</HintPath>
+      <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.0\lib\net46\System.Security.Cryptography.Algorithms.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Security.Cryptography.Encoding, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -193,19 +197,19 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Security.Cryptography.X509Certificates, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Security.Cryptography.X509Certificates.4.3.2\lib\net46\System.Security.Cryptography.X509Certificates.dll</HintPath>
+      <HintPath>..\packages\System.Security.Cryptography.X509Certificates.4.3.0\lib\net46\System.Security.Cryptography.X509Certificates.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Text.Encoding.CodePages, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Text.Encoding.CodePages.4.4.0\lib\net46\System.Text.Encoding.CodePages.dll</HintPath>
+      <HintPath>..\packages\System.Text.Encoding.CodePages.4.3.0\lib\net46\System.Text.Encoding.CodePages.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Threading.Thread, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Threading.Thread.4.3.0\lib\net46\System.Threading.Thread.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Windows.Forms" />
@@ -222,7 +226,7 @@
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Xml.ReaderWriter, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Xml.ReaderWriter.4.3.1\lib\net46\System.Xml.ReaderWriter.dll</HintPath>
+      <HintPath>..\packages\System.Xml.ReaderWriter.4.3.0\lib\net46\System.Xml.ReaderWriter.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Xml.XmlDocument, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -241,28 +245,28 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="Xceed.Wpf.AvalonDock, Version=3.2.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.3.2.0\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
+    <Reference Include="Xceed.Wpf.AvalonDock, Version=3.3.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Extended.Wpf.Toolkit.3.3.0\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Aero, Version=3.2.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.3.2.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.Aero.dll</HintPath>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Aero, Version=3.3.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Extended.Wpf.Toolkit.3.3.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.Aero.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Metro, Version=3.2.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.3.2.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.Metro.dll</HintPath>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Metro, Version=3.3.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Extended.Wpf.Toolkit.3.3.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.Metro.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.VS2010, Version=3.2.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.3.2.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.VS2010.dll</HintPath>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.VS2010, Version=3.3.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Extended.Wpf.Toolkit.3.3.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.VS2010.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xceed.Wpf.DataGrid, Version=3.2.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.3.2.0\lib\net40\Xceed.Wpf.DataGrid.dll</HintPath>
+    <Reference Include="Xceed.Wpf.DataGrid, Version=3.3.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Extended.Wpf.Toolkit.3.3.0\lib\net40\Xceed.Wpf.DataGrid.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Xceed.Wpf.Toolkit, Version=3.2.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.3.2.0\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
+    <Reference Include="Xceed.Wpf.Toolkit, Version=3.3.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Extended.Wpf.Toolkit.3.3.0\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
@@ -271,55 +275,82 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Application.xaml.vb">
+      <DependentUpon>Application.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Behaviors\CanvasMouseWheelBehavior.vb" />
+    <Compile Include="Behaviors\DocumentClosingBehavior.vb" />
+    <Compile Include="Behaviors\TextEditorPreviewMouseWheelBehavior.vb" />
+    <Compile Include="Converters\ContainerIfToGridConverter.vb" />
     <Compile Include="Converters\TreeNodeKindsToImageConverter.vb" />
     <Compile Include="Converters\TreeNodeKindsToStringConverter.vb" />
     <Compile Include="Libraries\EncodeResolver.vb" />
     <Compile Include="Libraries\MemoryDB.vb" />
     <Compile Include="Libraries\ProjectParser.vb" />
-    <Compile Include="Libraries\RoslynParser.vb" />
-    <Compile Include="Libraries\SolutionParser.vb" />
+    <Compile Include="Libraries\ReflectionHelper.vb" />
+    <Compile Include="Libraries\Roslyn\FoldingSyntaxWalker.vb" />
+    <Compile Include="Libraries\Roslyn\MethodSyntaxWalker.vb" />
+    <Compile Include="Libraries\Roslyn\SourceSyntaxWalker.vb" />
     <Compile Include="Libraries\VBNetFoldingStrategy.vb" />
+    <Compile Include="Libraries\ViewModelExtensions.vb" />
+    <Compile Include="Models\BaseTemplateModel.vb" />
+    <Compile Include="Models\CaseElseTemplateModel.vb" />
+    <Compile Include="Models\CaseTemplateModel.vb" />
+    <Compile Include="Models\CatchTemplateModel.vb" />
+    <Compile Include="Models\ConditionTemplateModel.vb" />
+    <Compile Include="Models\ContainerIfTemplateModel.vb" />
+    <Compile Include="Models\DoLoopTemplateModel.vb" />
+    <Compile Include="Models\DoUntilTemplateModel.vb" />
+    <Compile Include="Models\DoWhileTemplateModel.vb" />
+    <Compile Include="Models\ElseIfTemplateModel.vb" />
+    <Compile Include="Models\ElseTemplateModel.vb" />
     <Compile Include="Models\Enums.vb" />
-    <Compile Include="Models\NotificationObjectEx.vb" />
+    <Compile Include="Models\FinallyTemplateModel.vb" />
+    <Compile Include="Models\ForEachTemplateModel.vb" />
+    <Compile Include="Models\ForTemplateModel.vb" />
+    <Compile Include="Models\IfTemplateModel.vb" />
+    <Compile Include="Models\InheritsItemModel.vb" />
+    <Compile Include="Models\LoopTemplateModel.vb" />
+    <Compile Include="Models\MethodTemplateModel.vb" />
+    <Compile Include="Models\ContainerSelectTemplateModel.vb" />
+    <Compile Include="Models\SelectTemplateModel.vb" />
     <Compile Include="Models\TreeViewItemModel.vb" />
+    <Compile Include="Models\TryTemplateModel.vb" />
+    <Compile Include="Models\UsingTemplateModel.vb" />
+    <Compile Include="Models\WhileTemplateModel.vb" />
+    <Compile Include="ViewModels\AnchorablePaneViewModel.vb" />
+    <Compile Include="ViewModels\DocumentPaneViewModel.vb" />
+    <Compile Include="ViewModels\MainViewModel.vb" />
+    <Compile Include="ViewModels\MethodViewModel.vb" />
+    <Compile Include="ViewModels\ProgressViewModel.vb" />
+    <Compile Include="ViewModels\SolutionExplorerViewModel.vb" />
+    <Compile Include="ViewModels\SourceViewModel.vb" />
     <Compile Include="Views\ArrowLine\ArrowEnds.vb" />
     <Compile Include="Views\ArrowLine\ArrowLine.vb" />
     <Compile Include="Views\ArrowLine\ArrowLineBase.vb" />
-    <Compile Include="Views\EditorUserControl.xaml.vb">
-      <DependentUpon>EditorUserControl.xaml</DependentUpon>
+    <Compile Include="Views\BindableCanvas.vb" />
+    <Compile Include="Views\BindableTextEditor.vb" />
+    <Compile Include="Views\LayoutInitializer.vb" />
+    <Compile Include="Views\LayoutItemContainerStyleSelector.vb" />
+    <Compile Include="Views\LayoutItemTemplateSelector.vb" />
+    <Compile Include="Views\MainView.xaml.vb">
+      <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\MethodWindow.xaml.vb">
-      <DependentUpon>MethodWindow.xaml</DependentUpon>
+    <Compile Include="Views\MethodView.xaml.vb">
+      <DependentUpon>MethodView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ProgressWindow.xaml.vb">
-      <DependentUpon>ProgressWindow.xaml</DependentUpon>
+    <Compile Include="Views\ProgressView.xaml.vb">
+      <DependentUpon>ProgressView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ResizableThumb.vb" />
     <Compile Include="Views\ResizingAdorner.vb" />
-    <Page Include="Views\EditorUserControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="Application.xaml.vb">
-      <DependentUpon>Application.xaml</DependentUpon>
-      <SubType>Code</SubType>
+    <Compile Include="Views\SolutionExplorerView.xaml.vb">
+      <DependentUpon>SolutionExplorerView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\MainWindow.xaml.vb">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
+    <Compile Include="Views\SourceView.xaml.vb">
+      <DependentUpon>SourceView.xaml</DependentUpon>
     </Compile>
-    <Page Include="Views\MethodWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ProgressWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Import Include="System.Threading.Tasks" />
@@ -358,16 +389,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Resource Include="License\zlib-libpng-license.txt" />
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
     </EmbeddedResource>
     <None Include="Images\Visual Studio 2013 Image Library EULA.docx" />
-    <Resource Include="License\Microsoft-Software-License-terms.txt" />
-    <Content Include="License\MS-PL-license.txt" />
-    <None Include="License\Visual Studio 2013 Image Library EULA.docx" />
     <None Include="My Project\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
@@ -379,26 +406,58 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.6.0\analyzers\dotnet\vb\Microsoft.CodeAnalysis.Analyzers.dll" />
-    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.6.0\analyzers\dotnet\vb\Microsoft.CodeAnalysis.VisualBasic.Analyzers.dll" />
+    <Page Include="Views\InheritsClassDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MainView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MethodFlowchartDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MethodSearchDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MethodView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ProgressView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SolutionExplorerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SourceView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\Miscellaneousfile.png" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="Images\Class.png" />
     <Resource Include="Images\ComponentClass.png" />
+    <Resource Include="Images\Condition.png" />
     <Resource Include="Images\Delegate.png" />
+    <Resource Include="Images\Dependencies.png" />
     <Resource Include="Images\Enum.png" />
+    <Resource Include="Images\EnumItem.png" />
+    <Resource Include="Images\Event.png" />
     <Resource Include="Images\Field.png" />
     <Resource Include="Images\Folder_Collapse.png" />
     <Resource Include="Images\Folder_Expand.png" />
     <Resource Include="Images\Generatedfile.png" />
-    <Resource Include="Images\Condition.png" />
     <Resource Include="Images\Interface.png" />
     <Resource Include="Images\Loop_End.png" />
     <Resource Include="Images\Loop_Start.png" />
     <Resource Include="Images\Method.png" />
+    <Resource Include="Images\Miscellaneousfile.png" />
     <Resource Include="Images\Module.png" />
     <Resource Include="Images\Namespace.png" />
     <Resource Include="Images\Operator.png" />
@@ -412,16 +471,8 @@
     <Resource Include="Images\WindowsForm.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\Dependencies.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\Event.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\EnumItem.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="License\MIT-License.txt" />
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\vb\Microsoft.CodeAnalysis.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\vb\Microsoft.CodeAnalysis.VisualBasic.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

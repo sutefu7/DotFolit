@@ -1,0 +1,38 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:DotFolit"
+    xmlns:editor="http://icsharpcode.net/sharpdevelop/avalonedit">
+
+    <ControlTemplate x:Key="EditorTemplate">
+
+        <Border 
+            BorderBrush="Blue"
+            BorderThickness="1">
+
+            <DockPanel>
+
+                <ToolBar DockPanel.Dock="Top">
+                    <TextBlock Name="textblock1" Text="Untitled" />
+                </ToolBar>
+
+                <editor:TextEditor 
+                    Name="texteditor1"
+                    ShowLineNumbers="True"
+                    SyntaxHighlighting="VB"
+                    IsReadOnly="True">
+
+                    <editor:TextEditor.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Name="AddNewMenu" Header="このメソッドを表示" />
+                        </ContextMenu>
+                    </editor:TextEditor.ContextMenu>
+                    
+                </editor:TextEditor>
+
+            </DockPanel>
+            
+        </Border>
+        
+    </ControlTemplate>
+    
+</ResourceDictionary>

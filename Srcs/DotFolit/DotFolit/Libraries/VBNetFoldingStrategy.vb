@@ -18,10 +18,10 @@ Public Class VBNetFoldingStrategy
     Public Iterator Function CreateNewFoldings(document As TextDocument, firstErrorOffset As Integer) As IEnumerable(Of NewFolding)
 
         Dim source = document.Text
-        Dim analyzer = New RoslynParser
-        Dim items = analyzer.GetFoldingItems(source)
+        Dim walker = New FoldingSyntaxWalker
+        walker.Parse(source)
 
-        For Each item In items
+        For Each item In walker.Items
             Yield New NewFolding With {.StartOffset = item.Item1, .EndOffset = item.Item2, .Name = item.Item3}
         Next
 

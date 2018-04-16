@@ -1,0 +1,854 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:DotFolit">
+
+    <!-- メソッド -->
+    <DataTemplate DataType="{x:Type local:MethodTemplateModel}">
+
+        <Border
+            Name="border1"
+            BorderBrush="Pink"
+            BorderThickness="1"
+            Background="FloralWhite"
+            CornerRadius="8"
+            Margin="20">
+
+            <DockPanel>
+
+                <TextBlock 
+                    DockPanel.Dock="Top"
+                    Text="メソッド"
+                    Margin="10,5,0,0" />
+
+                <Line
+                    DockPanel.Dock="Top"
+                    Stroke="Gainsboro"
+                    StrokeThickness="1"
+                    Margin="10,0,10,5"
+                    X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                <TextBlock
+                    DockPanel.Dock="Top"
+                    Text="{Binding Signature}"
+                    Margin="10,0,50,0" />
+
+                <ItemsControl
+                    ItemsSource="{Binding Children}"
+                    Margin="20,0,0,20" />
+
+            </DockPanel>
+
+        </Border>
+
+        <!-- 
+        キャレット位置がメソッド定義行内に該当しない場合は、前回の図形をクリアしたい
+        Model を Nothing にしても NG だった。そのため、特殊文字の場合、非表示に変更するように対応する
+        -->
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding Signature}" Value="Clear">
+                <Setter TargetName="border1" Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+        </DataTemplate.Triggers>
+        
+    </DataTemplate>
+
+    <!-- Container If -->
+    <DataTemplate DataType="{x:Type local:ContainerIfTemplateModel}">
+
+        <ContentControl>
+            <ContentControl.Content>
+                <Binding Path="Children">
+                    <Binding.Converter>
+                        <local:ContainerIfToGridConverter />
+                    </Binding.Converter>
+                </Binding>
+            </ContentControl.Content>
+        </ContentControl>
+
+    </DataTemplate>
+
+    <!-- If -->
+    <DataTemplate DataType="{x:Type local:IfTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="ForestGreen"
+                BorderThickness="1"
+                Background="Honeydew"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="If"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- ElseIf -->
+    <DataTemplate DataType="{x:Type local:ElseIfTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="ForestGreen"
+                BorderThickness="1"
+                Background="Honeydew"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="ElseIf"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- Else -->
+    <DataTemplate DataType="{x:Type local:ElseTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="ForestGreen"
+                BorderThickness="1"
+                Background="Honeydew"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="Else"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- Container Select -->
+    <!-- ContainerIfToGridConverter を利用しているが、同じ構成の為、意図的に利用している -->
+    <DataTemplate DataType="{x:Type local:ContainerSelectTemplateModel}">
+
+        <ContentControl>
+            <ContentControl.Content>
+                <Binding Path="Children">
+                    <Binding.Converter>
+                        <local:ContainerIfToGridConverter />
+                    </Binding.Converter>
+                </Binding>
+            </ContentControl.Content>
+        </ContentControl>
+
+    </DataTemplate>
+
+    <!-- Select Case -->
+    <DataTemplate DataType="{x:Type local:SelectTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="ForestGreen"
+                BorderThickness="1"
+                Background="Honeydew"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="Select Case"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- Case -->
+    <DataTemplate DataType="{x:Type local:CaseTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="ForestGreen"
+                BorderThickness="1"
+                Background="Honeydew"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="Case"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- Case Else -->
+    <DataTemplate DataType="{x:Type local:CaseElseTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="ForestGreen"
+                BorderThickness="1"
+                Background="Honeydew"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="Case Else"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- For -->
+    <DataTemplate DataType="{x:Type local:ForTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="RoyalBlue"
+                BorderThickness="1"
+                Background="AliceBlue"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="For"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- ForEach -->
+    <DataTemplate DataType="{x:Type local:ForEachTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="RoyalBlue"
+                BorderThickness="1"
+                Background="AliceBlue"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="ForEach"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- While -->
+    <DataTemplate DataType="{x:Type local:WhileTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="RoyalBlue"
+                BorderThickness="1"
+                Background="AliceBlue"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="While"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- Do Loop -->
+    <DataTemplate DataType="{x:Type local:DoLoopTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="RoyalBlue"
+                BorderThickness="1"
+                Background="AliceBlue"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="Do Loop"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- Do While -->
+    <DataTemplate DataType="{x:Type local:DoWhileTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="RoyalBlue"
+                BorderThickness="1"
+                Background="AliceBlue"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="Do While"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- Do Until -->
+    <DataTemplate DataType="{x:Type local:DoUntilTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="RoyalBlue"
+                BorderThickness="1"
+                Background="AliceBlue"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="Do Until"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- Using -->
+    <DataTemplate DataType="{x:Type local:UsingTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="RoyalBlue"
+                BorderThickness="1"
+                Background="AliceBlue"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="Using"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- Try -->
+    <DataTemplate DataType="{x:Type local:TryTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="Tomato"
+                BorderThickness="1"
+                Background="Linen"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="Try"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- Catch -->
+    <DataTemplate DataType="{x:Type local:CatchTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="Tomato"
+                BorderThickness="1"
+                Background="Linen"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="Catch"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+    <!-- Finally -->
+    <DataTemplate DataType="{x:Type local:FinallyTemplateModel}">
+
+        <ItemsControl>
+
+            <TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,10,20,0" />
+
+            <Border
+                BorderBrush="Tomato"
+                BorderThickness="1"
+                Background="Linen"
+                CornerRadius="8"
+                Margin="10">
+
+                <DockPanel>
+
+                    <TextBlock
+                        DockPanel.Dock="Top"
+                        Text="Finally"
+                        Margin="10,5,10,0" />
+
+                    <Line
+                        DockPanel.Dock="Top"
+                        Stroke="Gainsboro"
+                        StrokeThickness="1"
+                        Margin="10,0,10,5"
+                        X2="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}" />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Children}"
+                        Margin="20,0,0,0" />
+
+                </DockPanel>
+
+            </Border>
+
+            <!--<TextBlock
+                Text="↓"
+                Foreground="Gainsboro"
+                Margin="20,0,20,10" />-->
+
+        </ItemsControl>
+
+    </DataTemplate>
+
+</ResourceDictionary>

@@ -3,8 +3,7 @@ Imports Livet
 
 
 Public Class TreeViewItemModel
-    Inherits NotificationObjectEx
-
+    Inherits ViewModel
 
 #Region "Text変更通知プロパティ"
     Private _Text As String
@@ -51,21 +50,6 @@ Public Class TreeViewItemModel
     End Property
 #End Region
 
-#Region "Parent変更通知プロパティ"
-    Private _Parent As TreeViewItemModel
-
-    Public Property Parent() As TreeViewItemModel
-        Get
-            Return _Parent
-        End Get
-        Set(ByVal value As TreeViewItemModel)
-            If (_Parent = value) Then Return
-            _Parent = value
-            RaisePropertyChanged()
-        End Set
-    End Property
-#End Region
-
 #Region "Children変更通知プロパティ"
     Private _Children As ObservableCollection(Of TreeViewItemModel)
 
@@ -74,8 +58,7 @@ Public Class TreeViewItemModel
             Return _Children
         End Get
         Set(ByVal value As ObservableCollection(Of TreeViewItemModel))
-            If (_Children Is Nothing) OrElse (value Is Nothing) Then Return
-            If _Children.SequenceEqual(value) Then Return
+            If (value Is Nothing) Then Return
             _Children = value
             RaisePropertyChanged()
         End Set
@@ -83,26 +66,6 @@ Public Class TreeViewItemModel
 #End Region
 
 #Region "TreeNodeKind変更通知プロパティ"
-
-    ' Kind(string)
-    ' Solution
-    ' Project
-    ' Source
-    ' Class
-    ' Structure
-    ' Interface
-    ' Module
-    ' Enum
-    ' Delegate
-
-    ' 後回し、名前空間→Type→IsSubclassOf() チェックか？
-    ' GeneratedFile -> ソース内に、CompilerGenerated 属性がある
-    ' WindowsForm -> 継承元クラスに Form がある場合（直接継承、間接継承）
-    ' UserControl -> 継承元クラスに UserControl がある場合（直接継承、間接継承）
-    ' Component -> 継承元クラスに Component がある場合（直接継承、間接継承）
-
-
-
     Private _TreeNodeKind As TreeNodeKinds
 
     Public Property TreeNodeKind() As TreeNodeKinds
@@ -169,7 +132,6 @@ Public Class TreeViewItemModel
         Me._Text = String.Empty
         Me._IsSelected = False
         Me._IsExpanded = False
-        Me._Parent = Nothing
         Me._Children = New ObservableCollection(Of TreeViewItemModel)
         Me._TreeNodeKind = TreeNodeKinds.None
         Me._FileName = String.Empty
@@ -178,15 +140,27 @@ Public Class TreeViewItemModel
 
     End Sub
 
-    Public Sub AddChild(child As TreeViewItemModel)
+    Public Function NewInstance() As TreeViewItemModel
 
-        child.Parent = Me
-        Me.Children.Add(child)
+        Dim model = New TreeViewItemModel
+        model.Text = Me.Text
+        model.IsSelected = Me.IsSelected
+        model.IsExpanded = Me.IsExpanded
 
-    End Sub
+        model.Children = New ObservableCollection(Of TreeViewItemModel)
+        For Each child In Me.Children
+            model.Children.Add(child.NewInstance())
+        Next
+
+        model.TreeNodeKind = Me.TreeNodeKind
+        model.FileName = Me.FileName
+        model.ContainerName = Me.ContainerName
+        model.StartLength = Me.StartLength
+
+        Return model
+
+    End Function
 
 #End Region
-
-
 
 End Class

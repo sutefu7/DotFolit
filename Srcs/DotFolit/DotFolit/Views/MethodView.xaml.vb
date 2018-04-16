@@ -1,27 +1,19 @@
 ﻿Imports System.Data
 Imports System.IO
-Imports System.Text
-Imports System.Text.RegularExpressions
-Imports System.Reflection
-Imports System.Windows.Controls.Primitives
-
 Imports ICSharpCode.AvalonEdit
 Imports ICSharpCode.AvalonEdit.Folding
-
 Imports Microsoft.CodeAnalysis
 Imports Microsoft.CodeAnalysis.MSBuild
-Imports Microsoft.CodeAnalysis.VisualBasic
-Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 Imports Microsoft.CodeAnalysis.FindSymbols
-
 Imports DotFolit.Petzold.Media2D
 
-
-Public Class MethodWindow
+Public Class MethodView
 
 #Region "フィールド、プロパティ"
 
-    Public Property StartSourceFile As String = String.Empty
+    Private SelectedThumb As ResizableThumb = Nothing
+    Private NextSourceFile As String = String.Empty
+    Private NextStartLength As Integer = -1
 
 #End Region
 
@@ -29,47 +21,8 @@ Public Class MethodWindow
 
     Private Sub Window_Loaded(sender As Object, e As RoutedEventArgs)
 
-        Me.AddNew(Me.StartSourceFile, 0)
-
-    End Sub
-
-#End Region
-
-#Region "Thumb コントロールのドラッグアンドドロップ移動イベント"
-
-    ' なんで、あらぶるんだろう？
-
-    Private Sub Thumb_DragDelta(sender As Object, e As DragDeltaEventArgs)
-
-        Dim moveThumb = TryCast(e.Source, ResizableThumb)
-        If moveThumb Is Nothing Then
-            Return
-        End If
-
-        Canvas.SetLeft(moveThumb, Canvas.GetLeft(moveThumb) + e.HorizontalChange)
-        Canvas.SetTop(moveThumb, Canvas.GetTop(moveThumb) + e.VerticalChange)
-
-        Me.UpdateLineLocation(moveThumb)
-
-    End Sub
-
-#End Region
-
-#Region "Menu の隣に追加クリックイベント"
-
-    Private Sub Menu_Click_AddNew(sender As Object, e As RoutedEventArgs)
-
-        'Me.AddNew()
-
-    End Sub
-
-#End Region
-
-#Region "Menu の最前面に移動クリックイベント"
-
-    Private Sub Menu_Click_ChangeZIndexToMostTop(sender As Object, e As RoutedEventArgs)
-
-        'Canvas.SetZIndex(Me.SelectedThumb, 1)
+        Dim vm = TryCast(Me.DataContext, MethodViewModel)
+        Me.AddNew(vm.SelectedNode.FileName, 0)
 
     End Sub
 
@@ -80,9 +33,9 @@ Public Class MethodWindow
     Private Async Sub Caret_PositionChanged(sender As Object, e As EventArgs)
 
         Dim texteditor1 = TryCast(sender, TextEditor)
-        Dim thumb1 = TryCast(TryCast(TryCast(texteditor1.Parent, DockPanel).Parent, Border).TemplatedParent, ResizableThumb)
         Dim sourceFile = texteditor1.Document.FileName
         Dim offset = texteditor1.TextArea.Caret.Offset
+        Dim menu1 = TryCast(texteditor1.ContextMenu.Items(0), MenuItem)
 
         Dim sourceTree = MemoryDB.Instance.SyntaxTreeItems.FirstOrDefault(Function(x) x.FilePath = sourceFile)
         Dim model = MemoryDB.Instance.CompilationItem.GetSemanticModel(sourceTree)
@@ -110,129 +63,42 @@ Public Class MethodWindow
             Debug.WriteLine(ex.ToString())
         End Try
 
+        ' 見つからなかった
         If si Is Nothing Then
-            Debug.WriteLine("not found")
+
+            Me.SelectedThumb = Nothing
+            Me.NextSourceFile = String.Empty
+            Me.NextStartLength = -1
+
+            'texteditor1.ContextMenu.Visibility = Visibility.Collapsed
+            menu1.IsEnabled = False
+
             Return
+
         End If
 
         ' メソッド以外は対象外ではじく
-        If si.Kind <> SymbolKind.Method Then
-            Return
-        End If
+        If si.Kind = SymbolKind.Method Then
 
+            Me.SelectedThumb = TryCast(TryCast(TryCast(texteditor1.Parent, DockPanel).Parent, Border).TemplatedParent, ResizableThumb)
+            Me.NextSourceFile = si.ContainingType.Locations(0).SourceTree.FilePath
+            Me.NextStartLength = si.DeclaringSyntaxReferences(0).Span.Start
 
-        'If si.Locations(0).Kind = LocationKind.SourceFile Then
-        '    ' 内部ソースにある場合？
+            ' メソッド対象以外を右クリックした後（このタイミングでは、コンテキストメニュー非表示で OK なのだが）、
+            ' メソッド対象を左クリックするだけで、コンテキストメニューが表示されてしまう現象の対応
+            'texteditor1.ContextMenu.Visibility = Visibility.Visible
+            menu1.IsEnabled = True
 
-        '    Dim callerFile = si.Locations(0).SourceTree.FilePath
-        '    Dim startLength = si.Locations(0).SourceSpan.Start
-        '    Console.WriteLine($"{callerFile}({startLength})")
+        Else
 
-        '    Me.AddNew(callerFile, startLength)
+            Me.SelectedThumb = Nothing
+            Me.NextSourceFile = String.Empty
+            Me.NextStartLength = -1
 
-        'Else
-        '    ' 外部dll側にある場合？
-        '    Dim target = si.ToString()
-        '    Dim result = Me.TreeItems.FirstOrDefault(Function(x) x.GetRoot().DescendantNodes().Any(Function(y) y.ToString() = target))
-        '    Dim result2 = result.GetRoot().DescendantNodes().FirstOrDefault(Function(y) y.ToString() = target)
-
-        '    Dim callerFile = result2.SyntaxTree.FilePath
-        '    Dim startLength = result2.Span.Start
-        '    Console.WriteLine($"{callerFile}({startLength})")
-
-        '    Me.AddNew(callerFile, startLength)
-
-        'End If
-
-
-
-        ' 通常はソースファイル＝vbproj ファイルがあるフォルダなのだが、
-        ' プロジェクト内にサブフォルダを作成している場合、さかのぼってフォルダパスを取得する
-        ' 「vbproj ファイルがあるフォルダ」をもとに、同じ名前空間かどうかを判断したいため
-        Dim sourceDir = Path.GetDirectoryName(sourceFile)
-        While True
-
-            If Directory.EnumerateFiles(sourceDir, "*.vbproj").Any() Then
-                Exit While
-            End If
-            sourceDir = Path.GetDirectoryName(sourceDir)
-
-        End While
-
-        Dim signature = si.ToString()
-        Dim candidateTrees = MemoryDB.Instance.SyntaxTreeItems.Where(Function(x) x.GetRoot().DescendantNodes().Any(Function(y) y.ToString() = signature))
-        Dim foundSignature = False
-
-        If candidateTrees.Count() = 1 Then
-
-            Dim node = candidateTrees(0).GetRoot().DescendantNodes().FirstOrDefault(Function(x) x.ToString() = signature)
-            Dim callerFile = node.SyntaxTree.FilePath
-            Dim startLength = node.Span.Start
-            Me.AddNew(callerFile, startLength, thumb1)
-            foundSignature = True
-        End If
-
-        ' 可能性が複数ある場合、以下の優先度で探すのはどうか？
-        ' １．同じフォルダ内（プロジェクト内）、または子フォルダ内にファイル名がある
-        ' ２．違うフォルダ内（同ソリューションフォルダ内ではあるが、別フォルダ内）にファイル名がある
-
-        ' 動作結果を見ると、ISymbol.ContainingAssembly がMyCompilation（作成時に名付けた名称）の場合、同プロジェクト内にありそう、
-        ' それ以外の場合、別プロジェクト内にありそう、ということみたい？
-
-        ' １．同プロジェクト内
-        If Not foundSignature Then
-
-            For Each candidateTree In candidateTrees
-
-                If si.ContainingAssembly.ToString().Contains("MyCompilation") Then
-
-                    If candidateTree.FilePath.StartsWith(sourceDir) Then
-
-                        Dim node = candidateTree.GetRoot().DescendantNodes().FirstOrDefault(Function(x) x.ToString() = signature)
-                        Dim callerFile = node.SyntaxTree.FilePath
-                        Dim startLength = node.Span.Start
-                        Me.AddNew(callerFile, startLength, thumb1)
-
-                        foundSignature = True
-                        Exit For
-
-                    End If
-
-                End If
-
-            Next
+            'texteditor1.ContextMenu.Visibility = Visibility.Collapsed
+            menu1.IsEnabled = False
 
         End If
-
-        ' ２．別プロジェクト内
-        If Not foundSignature Then
-
-            For Each candidateTree In candidateTrees
-
-                If Not candidateTree.FilePath.StartsWith(sourceDir) Then
-
-                    Dim node = candidateTree.GetRoot().DescendantNodes().FirstOrDefault(Function(x) x.ToString() = signature)
-                    Dim callerFile = node.SyntaxTree.FilePath
-                    Dim startLength = node.Span.Start
-                    Me.AddNew(callerFile, startLength, thumb1)
-
-                    foundSignature = True
-                    Exit For
-
-                End If
-
-            Next
-
-        End If
-
-        If Not foundSignature Then
-            Return
-        End If
-
-
-
-
-
 
     End Sub
 
@@ -265,9 +131,19 @@ Public Class MethodWindow
 
 #End Region
 
+#Region "このメソッドを表示メニューのクリック"
+
+    Private Sub MenuItem_Click(sender As Object, e As RoutedEventArgs)
+
+        Me.AddNew(Me.NextSourceFile, Me.NextStartLength)
+
+    End Sub
+
+#End Region
+
 #Region "メソッド"
 
-    Private Sub AddNew(sourceFile As String, startLength As Integer, Optional selectedThumb As ResizableThumb = Nothing)
+    Private Sub AddNew(sourceFile As String, startLength As Integer)
 
         ' 表示図形の作成
         Dim newThumb = New ResizableThumb
@@ -298,7 +174,6 @@ Public Class MethodWindow
 
         ' メンバー定義位置が見えるようにスクロール
         ' （いまいちうまく扱えないスクロール処理
-        ' EditorUserControl.xaml.vb/treeview1_SelectedItemChanged メソッドに書いたやり方と同じだと、うまくいかない
         ' TextEditor.ScrollToVerticalOffset メソッドと、TextEditor.ScrollToLine メソッドの組み合わせで、うまくスクロールしてくれた）
         texteditor1.ScrollToVerticalOffset(startLength)
 
@@ -322,7 +197,7 @@ Public Class MethodWindow
         strategy.UpdateFoldings(manager, texteditor1.Document)
 
         ' 表示位置をセット
-        Dim pos = Me.GetNewLocation(selectedThumb)
+        Dim pos = Me.GetNewLocation()
         Canvas.SetLeft(newThumb, pos.X)
         Canvas.SetTop(newThumb, pos.Y)
 
@@ -338,15 +213,15 @@ Public Class MethodWindow
 
                                                                End Sub
 
-        ' 移動イベントの購読
-        AddHandler newThumb.DragDelta, AddressOf Me.Thumb_DragDelta
+        Dim menu1 = TryCast(newThumb.Template.FindName("AddNewMenu", newThumb), MenuItem)
+        AddHandler menu1.Click, AddressOf Me.MenuItem_Click
 
         ' キャンバスに登録
-        Me.MethodCanvas.Children.Add(newThumb)
+        Me.canvas1.Children.Add(newThumb)
 
         ' コネクタの接続
         ' 矢印線でつながれていると、呼び出し元、呼び出し先が分かりやすいのだが、不要か？
-        If selectedThumb Is Nothing Then
+        If Me.SelectedThumb Is Nothing Then
             Return
         End If
 
@@ -354,33 +229,33 @@ Public Class MethodWindow
         Dim arrow = New ArrowLine
         arrow.Stroke = Brushes.Green
         arrow.StrokeThickness = 1
-        MethodCanvas.Children.Add(arrow)
+        Me.canvas1.Children.Add(arrow)
 
-        selectedThumb.StartLines.Add(arrow)
+        Me.SelectedThumb.StartLines.Add(arrow)
         newThumb.EndLines.Add(arrow)
 
-        Me.UpdateLineLocation(selectedThumb)
+        Me.UpdateLineLocation(Me.SelectedThumb)
         Me.UpdateLineLocation(newThumb)
 
         ' なぜか、最後の図形だけ、矢印線が左上の角を指してしまう不具合
         ' → ActualWidth, ActualHeight が 0 だから。いったん画面表示させないとダメか？
         ' → Measure メソッドを呼び出して、希望サイズを更新する。こちらで矢印線の位置を調整する
-        Dim newSize = New Size(MethodCanvas.ActualWidth, MethodCanvas.ActualHeight)
-        MethodCanvas.Measure(newSize)
+        Dim newSize = New Size(Me.canvas1.ActualWidth, Me.canvas1.ActualHeight)
+        Me.canvas1.Measure(newSize)
         Me.UpdateLineLocation(newThumb)
 
     End Sub
 
-    Private Function GetNewLocation(Optional selectedThumb As ResizableThumb = Nothing) As Point
+    Private Function GetNewLocation() As Point
 
         ' 最も右下に位置する ResizableThumb を探す
-        Dim items = Me.MethodCanvas.Children.OfType(Of ResizableThumb)()
+        Dim items = Me.canvas1.Children.OfType(Of ResizableThumb)()
         If items.Count() = 0 Then
             Return New Point(10, 10)
         End If
 
         ' 既に表示されている図形のうち、１つ目の図形位置を基準として、今回の図形位置を計算する
-        Dim item = If(selectedThumb Is Nothing, items(0), selectedThumb)
+        Dim item = If(Me.SelectedThumb Is Nothing, items(0), Me.SelectedThumb)
         Dim newWidth As Double = item.ActualWidth
         Dim newHeight As Double = item.ActualHeight
 
@@ -434,7 +309,6 @@ Public Class MethodWindow
 
     End Function
 
-    ' ResizableThumb.vb, EditorUserControl.xaml.vb 側にも同じメソッドがあるので同期すること
     Private Sub UpdateLineLocation(target As ResizableThumb)
 
         Dim newX = Canvas.GetLeft(target)

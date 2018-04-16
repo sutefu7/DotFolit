@@ -31,10 +31,15 @@ Public NotInheritable Class MemoryDB
 
 #Region "フィールド、プロパティ"
 
+    ' コンテナやコンテナメンバー、定義行の文字列位置を登録しておく。主にメンバーツリー用
     Public Property DB As DataSet = Nothing
+
+    ' 主にメソッドの追跡用
     Public Property SyntaxTreeItems As List(Of SyntaxTree) = Nothing
     Public Property CompilationItem As VisualBasicCompilation = Nothing
 
+    ' 主にクラスの継承関係図用
+    Public Property InheritsModelCache As Dictionary(Of String, InheritsItemModel) = Nothing
 
 #End Region
 
@@ -45,16 +50,18 @@ Public NotInheritable Class MemoryDB
         Dim ds = New DataSet
         Dim table As DataTable = Nothing
 
-        ' Class,  ConsoleApp1,        ConsoleApp1.Class1,         "",        "",        ""
-        ' Field,  ConsoleApp1.Class1, ConsoleApp1.Class1._Width,  "Integer", "",        ""
-        ' Method, ConsoleApp1.Class1, ConsoleApp1.Class1.GetData, "",        "Integer", "0()"
-        ' Method, ConsoleApp1.Class1, ConsoleApp1.Class1.SetData, "",        "Void",    "1(Integer)"
+        ' Class,  ConsoleApp1,          ConsoleApp1.Class1`1,         "",        "",        ""
+        ' Field,  ConsoleApp1.Class1`1, ConsoleApp1.Class1`1._Width,  "Integer", "",        ""
+        ' Method, ConsoleApp1.Class1`1, ConsoleApp1.Class1`1.GetData, "",        "Integer", "0()"
+        ' Method, ConsoleApp1.Class1`1, ConsoleApp1.Class1`1.SetData, "",        "Void",    "1(Integer)"
 
         ' NamespaceResolution テーブル
         table = ds.Tables.Add("NamespaceResolution")
         table.Columns.Add("DefineKind", GetType(String))
         table.Columns.Add("ContainerFullName", GetType(String))
         table.Columns.Add("DefineFullName", GetType(String))
+        table.Columns.Add("DefineName", GetType(String))
+        table.Columns.Add("DisplayDefineName", GetType(String))
         table.Columns.Add("DefineType", GetType(String))
         table.Columns.Add("ReturnType", GetType(String))
         table.Columns.Add("MethodArguments", GetType(String))
@@ -63,8 +70,6 @@ Public NotInheritable Class MemoryDB
         table.Columns.Add("SourceFile", GetType(String))
         table.Columns.Add("StartLength", GetType(Integer))
         table.Columns.Add("EndLength", GetType(Integer))
-        table.Columns.Add("StartLineNumber", GetType(Integer))
-        table.Columns.Add("EndLineNumber", GetType(Integer))
 
         ' LanguageConversion テーブル
         table = ds.Tables.Add("LanguageConversion")

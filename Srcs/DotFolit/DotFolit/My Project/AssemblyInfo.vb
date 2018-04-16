@@ -42,7 +42,7 @@ Imports System.Windows
 
 
 'このプロジェクトが COM に公開される場合、次の GUID が typelib の ID になります
-<Assembly: Guid("cc6476b7-4d2f-4932-a614-64ac47a67b4b")>
+<Assembly: Guid("4ea98719-03d1-4c61-be17-1739980d8bcb")>
 
 ' アセンブリのバージョン情報は次の 4 つの値で構成されています:
 '

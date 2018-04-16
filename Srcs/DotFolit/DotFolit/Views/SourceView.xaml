@@ -1,0 +1,160 @@
+﻿<UserControl x:Class="SourceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DotFolit"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+             xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
+             xmlns:edit="http://icsharpcode.net/sharpdevelop/avalonedit"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+
+        <local:TreeNodeKindsToImageConverter x:Key="TreeNodeKindsToImageConverter" />
+        <local:TreeNodeKindsToStringConverter x:Key="TreeNodeKindsToStringConverter" />
+
+    </UserControl.Resources>
+    
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+
+        <local:BindableTextEditor
+            Grid.Column="0"
+            SourceFile="{Binding SourceFile}"
+            SourceCode="{Binding SourceCode}"
+            CaretLocation="{Binding CaretLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            CaretOffset="{Binding CaretOffset, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="CaretPositionChanged">
+                    <l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="BindableTextEditor_CaretPositionChanged" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
+            <i:Interaction.Behaviors>
+                <local:TextEditorPreviewMouseWheelBehavior />
+            </i:Interaction.Behaviors>
+            
+        </local:BindableTextEditor>
+
+        <GridSplitter
+            Grid.Column="1"
+            Width="5"
+            HorizontalAlignment="Center" VerticalAlignment="Stretch" />
+
+        <TabControl
+            Grid.Column="2">
+
+            <TabItem Header="メンバーツリー">
+                
+                <TreeView
+                    ItemsSource="{Binding TreeItems}"
+                    VirtualizingStackPanel.IsVirtualizing="True"
+                    VirtualizingStackPanel.VirtualizationMode="Recycling">
+
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectedItemChanged">
+                            <!--<l:LivetCallMethodAction 
+                                MethodTarget="{Binding}" 
+                                MethodName="MemberTree_SelectedItemChanged" 
+                                MethodParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TreeView}}, Path=SelectedItem}" />-->
+                            <i:InvokeCommandAction 
+                                Command="{Binding SelectedItemChangedCommand}" 
+                                CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TreeView}}, Path=SelectedItem}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+
+                    <TreeView.Resources>
+
+                        <Style TargetType="TreeViewItem">
+                            <Setter Property="IsExpanded" Value="{Binding IsExpanded}" />
+                            <Setter Property="IsSelected" Value="{Binding IsSelected}" />
+                        </Style>
+                        
+                    </TreeView.Resources>
+
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate DataType="{x:Type local:TreeViewItemModel}" ItemsSource="{Binding Children}">
+
+                            <StackPanel Orientation="Horizontal">
+
+                                <Image Name="image1" Source="{Binding TreeNodeKind, Converter={StaticResource TreeNodeKindsToImageConverter}}" Margin="5,0,2,0" />
+                                <TextBlock Name="textblock1" Text="{Binding Text}" />
+
+                            </StackPanel>
+
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                    
+                </TreeView>
+                
+            </TabItem>
+
+            <TabItem Header="継承関係図">
+
+                <ScrollViewer
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto">
+
+                    <local:BindableCanvas 
+                        Background="Transparent"
+                        Width="50000"
+                        Height="50000"
+                        ItemsSource="{Binding InheritsItems, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        
+                        <local:BindableCanvas.Resources>
+                            <ResourceDictionary Source="/Views/InheritsClassDictionary.xaml" />
+                        </local:BindableCanvas.Resources>
+
+                        <i:Interaction.Behaviors>
+                            <local:CanvasMouseWheelBehavior />
+                        </i:Interaction.Behaviors>
+                        
+                    </local:BindableCanvas>
+
+                </ScrollViewer>
+
+
+
+            </TabItem>
+
+            <TabItem Header="フローチャート図">
+
+                <ScrollViewer
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto">
+
+                    <Canvas 
+                        Background="Transparent"
+                        Width="50000"
+                        Height="50000">
+                        
+                        <Canvas.Resources>
+                            <ResourceDictionary Source="/Views/MethodFlowchartDictionary.xaml" />
+                        </Canvas.Resources>
+                        
+                        <ContentControl Content="{Binding MethodModel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <i:Interaction.Behaviors>
+                            <local:CanvasMouseWheelBehavior />
+                        </i:Interaction.Behaviors>
+                        
+                    </Canvas>
+
+                </ScrollViewer>
+                
+            </TabItem>
+
+        </TabControl>
+
+    </Grid>
+    
+</UserControl>
