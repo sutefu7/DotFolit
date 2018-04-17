@@ -81,8 +81,8 @@ Public Class MethodView
         If si.Kind = SymbolKind.Method Then
 
             Me.SelectedThumb = TryCast(TryCast(TryCast(texteditor1.Parent, DockPanel).Parent, Border).TemplatedParent, ResizableThumb)
-            Me.NextSourceFile = si.ContainingType.Locations(0).SourceTree.FilePath
-            Me.NextStartLength = si.DeclaringSyntaxReferences(0).Span.Start
+            Me.NextSourceFile = si.Locations(0).SourceTree.FilePath
+            Me.NextStartLength = si.Locations(0).SourceSpan.Start
 
             ' メソッド対象以外を右クリックした後（このタイミングでは、コンテキストメニュー非表示で OK なのだが）、
             ' メソッド対象を左クリックするだけで、コンテキストメニューが表示されてしまう現象の対応
@@ -166,7 +166,7 @@ Public Class MethodView
 
         ' ソースをセット
         Dim texteditor1 = TryCast(newThumb.Template.FindName("texteditor1", newThumb), TextEditor)
-        texteditor1.Document.Text = File.ReadAllText(sourceFile, EncodeResolver.GetEncoding(sourceFile))
+        texteditor1.Text = File.ReadAllText(sourceFile, EncodeResolver.GetEncoding(sourceFile))
         texteditor1.Document.FileName = sourceFile
 
         ' キャレット位置を、メンバー定義位置へ移動
