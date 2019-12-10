@@ -36,7 +36,7 @@ Public NotInheritable Class MemoryDB
 
     ' 主にメソッドの追跡用
     Public Property SyntaxTreeItems As List(Of SyntaxTree) = Nothing
-    Public Property CompilationItem As VisualBasicCompilation = Nothing
+    Public Property CompilationItems As List(Of VisualBasicCompilation) = Nothing
 
     ' 主にクラスの継承関係図用
     Public Property InheritsModelCache As Dictionary(Of String, InheritsItemModel) = Nothing

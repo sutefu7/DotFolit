@@ -101,10 +101,11 @@ Public Class SolutionExplorerViewModel
         For Each projectInfo In solutionInfo.Projects
 
             ' アセンブリファイル
-            If Not File.Exists(projectInfo.OutputFilePath) Then
+            Dim outputFilePath = GetOutputFilePath(projectInfo)
+            If Not File.Exists(outputFilePath) Then
 
                 Dim message = $"{projectInfo.Name} プロジェクトのアセンブリファイルが見つかりませんでした。{Environment.NewLine}"
-                message &= $"{projectInfo.OutputFilePath}{Environment.NewLine}"
+                message &= $"{outputFilePath}{Environment.NewLine}"
                 message &= $"{projectInfo.Name} プロジェクトがビルドされていない可能性があります。お手数ですが、いったんビルドしてから、再度ご利用ください。"
 
                 Await Me.ShowErrorMessageAsync(message)
@@ -125,44 +126,92 @@ Public Class SolutionExplorerViewModel
         ' メソッド追跡画面用に、変数準備
         Dim task2 = Task.Run(Sub()
 
+                                 Dim parser = New ProjectParser
                                  Dim dllItems = New List(Of MetadataReference)
                                  Dim srcItems = New List(Of SyntaxTree)
+                                 Dim srcItems2 = New List(Of SyntaxTree)
+                                 Dim compItems = New List(Of VisualBasicCompilation)
+
+                                 Dim mscorlib = MetadataReference.CreateFromFile(GetType(Object).GetTypeInfo().Assembly.Location)
+                                 dllItems.Add(mscorlib)
 
                                  For Each projectInfo In solutionInfo.Projects
 
                                      ' 参照dll
-                                     For Each metaInfo In projectInfo.MetadataReferences
+                                     'For Each metaInfo In projectInfo.MetadataReferences
 
-                                         If Not dllItems.Any(Function(x) x.Display = metaInfo.Display) Then
-                                             dllItems.Add(MetadataReference.CreateFromFile(metaInfo.Display))
-                                         End If
+                                     '    If Not dllItems.Any(Function(x) x.Display = metaInfo.Display) Then
+                                     '        dllItems.Add(MetadataReference.CreateFromFile(metaInfo.Display))
+                                     '    End If
 
-                                     Next
+                                     'Next
+
+                                     ' TODO, 名前だけなので、GAC パスや Nuget, その他個別パスを探して、フルパス変換する必要あり
+                                     'Dim metadataReferences = parser.GetReferenceAssemblyNames(projectInfo.FilePath)
+                                     'For Each metaInfo In metadataReferences
+
+                                     '    Dim location = System.Type.GetType(metaInfo).Assembly.Location ' NG. 名前空間だけではなく、何かのクラスもくっつけないとダメ
+
+                                     '    If Not dllItems.Any(Function(x) x.Display = location) Then
+                                     '        dllItems.Add(MetadataReference.CreateFromFile(location))
+                                     '    End If
+
+                                     'Next
 
                                      ' ソースファイル
-                                     For Each sourceInfo In projectInfo.Documents
+                                     'For Each sourceInfo In projectInfo.Documents
 
-                                         Dim source = File.ReadAllText(sourceInfo.FilePath, EncodeResolver.GetEncoding(sourceInfo.FilePath))
-                                         Dim tree = VisualBasicSyntaxTree.ParseText(source,, sourceInfo.FilePath)
-                                         srcItems.Add(tree)
+                                     '    Dim source = File.ReadAllText(sourceInfo.FilePath, EncodeResolver.GetEncoding(sourceInfo.FilePath))
+                                     '    Dim tree = VisualBasicSyntaxTree.ParseText(source,, sourceInfo.FilePath)
+                                     '    srcItems.Add(tree)
+
+                                     'Next
+
+                                     srcItems2.Clear()
+                                     Dim documents = parser.GetSourceFiles(projectInfo.FilePath)
+                                     For Each sourceInfo In documents
+
+                                         Dim source = File.ReadAllText(sourceInfo, EncodeResolver.GetEncoding(sourceInfo))
+                                         Dim tree = VisualBasicSyntaxTree.ParseText(source,, sourceInfo)
+                                         srcItems2.Add(tree)
 
                                      Next
 
+
+
                                      ' アセンブリファイル
-                                     If Not dllItems.Any(Function(x) x.Display = projectInfo.OutputFilePath) Then
-                                         dllItems.Add(MetadataReference.CreateFromFile(projectInfo.OutputFilePath))
+                                     Dim outputFilePath = GetOutputFilePath(projectInfo)
+                                     If Not dllItems.Any(Function(x) x.Display = outputFilePath) Then
+                                         'dllItems.Add(MetadataReference.CreateFromFile(outputFilePath))
                                      End If
 
                                      ' クラスの継承関係図の準備で必要なため、読み込んでおく（アプリケーションドメインに置いておく）
-                                     Dim asm = Assembly.LoadFrom(projectInfo.OutputFilePath)
+                                     Dim asm = Assembly.LoadFrom(outputFilePath)
+
+                                     Dim options = New VisualBasicCompilationOptions(
+                                        outputKind:=If(Path.GetExtension(outputFilePath).ToLower() = ".exe", OutputKind.ConsoleApplication, OutputKind.DynamicallyLinkedLibrary),
+                                        rootNamespace:=parser.GetRootNamespace(projectInfo.FilePath))
+
+                                     ' メインプロジェクトのソースを追加した後で、登録済みのソースを追加する（検索優先度の調整？）
+                                     srcItems2.AddRange(srcItems)
+                                     Dim compilation = VisualBasicCompilation.Create(
+                                        projectInfo.AssemblyName,
+                                        srcItems2,
+                                        dllItems,
+                                        options)
+
+                                     ' メイン処理用のソースリストは、登録順に直してから追加する
+                                     srcItems.Clear()
+                                     srcItems.AddRange(srcItems2)
+                                     srcItems.Reverse()
+                                     compItems.Add(compilation)
 
                                  Next
 
-                                 Dim compilation = VisualBasicCompilation.Create("MyCompilation", srcItems, dllItems)
 
                                  ' メモリDBにセット
                                  MemoryDB.Instance.SyntaxTreeItems = srcItems
-                                 MemoryDB.Instance.CompilationItem = compilation
+                                 MemoryDB.Instance.CompilationItems = compItems
 
                              End Sub)
 
@@ -174,12 +223,23 @@ Public Class SolutionExplorerViewModel
 
                                      ' ソースファイル
                                      Dim projectNamespace = parser.GetRootNamespace(projectInfo.FilePath)
-                                     For Each sourceInfo In projectInfo.Documents
+                                     'For Each sourceInfo In projectInfo.Documents
 
-                                         Dim source = File.ReadAllText(sourceInfo.FilePath, EncodeResolver.GetEncoding(sourceInfo.FilePath))
-                                         Dim tree = VisualBasicSyntaxTree.ParseText(source,, sourceInfo.FilePath)
+                                     '    Dim source = File.ReadAllText(sourceInfo.FilePath, EncodeResolver.GetEncoding(sourceInfo.FilePath))
+                                     '    Dim tree = VisualBasicSyntaxTree.ParseText(source,, sourceInfo.FilePath)
+                                     '    Dim walker = New SourceSyntaxWalker
+                                     '    walker.Parse(MemoryDB.Instance.DB.Tables("NamespaceResolution"), projectNamespace, sourceInfo.FilePath, tree)
+
+                                     'Next
+
+
+                                     Dim documents = parser.GetSourceFiles(projectInfo.FilePath)
+                                     For Each sourceInfo In documents
+
+                                         Dim source = File.ReadAllText(sourceInfo, EncodeResolver.GetEncoding(sourceInfo))
+                                         Dim tree = VisualBasicSyntaxTree.ParseText(source,, sourceInfo)
                                          Dim walker = New SourceSyntaxWalker
-                                         walker.Parse(MemoryDB.Instance.DB.Tables("NamespaceResolution"), projectNamespace, sourceInfo.FilePath, tree)
+                                         walker.Parse(MemoryDB.Instance.DB.Tables("NamespaceResolution"), projectNamespace, sourceInfo, tree)
 
                                      Next
 
@@ -190,6 +250,35 @@ Public Class SolutionExplorerViewModel
         Await Task.WhenAll(task1, task2, task3)
 
     End Sub
+
+    Private Function GetOutputFilePath(projectInfo As Project) As String
+
+        If Not String.IsNullOrWhiteSpace(projectInfo.OutputFilePath) Then
+            Return projectInfo.OutputFilePath
+        End If
+
+        Dim projectDir = Path.GetDirectoryName(projectInfo.FilePath)
+        Dim exeDir = Path.Combine(projectDir, "bin", "Debug")
+
+        If Not Directory.Exists(exeDir) Then
+            exeDir = Path.Combine(projectDir, "bin", "Release")
+        End If
+
+        If Not Directory.Exists(exeDir) Then
+            Throw New DirectoryNotFoundException("ビルド済みフォルダが見つかりませんでした。一度ビルドを実行してください。")
+        End If
+
+        Dim outputFilePath = Directory.EnumerateFiles(exeDir, $"{projectInfo.AssemblyName}.*").
+            Where(Function(x) Path.GetExtension(x).ToLower() = ".exe" OrElse Path.GetExtension(x).ToLower() = ".dll").
+            FirstOrDefault()
+
+        If String.IsNullOrWhiteSpace(outputFilePath) OrElse Not File.Exists(outputFilePath) Then
+            Throw New FileNotFoundException("アセンブリファイルが見つかりませんでした。一度ビルドを実行してください。")
+        End If
+
+        Return outputFilePath
+
+    End Function
 
     Private Function CreateTreeData(solutionInfo As Solution) As TreeViewItemModel
 

@@ -38,12 +38,22 @@ Public Class MethodView
         Dim menu1 = TryCast(texteditor1.ContextMenu.Items(0), MenuItem)
 
         Dim sourceTree = MemoryDB.Instance.SyntaxTreeItems.FirstOrDefault(Function(x) x.FilePath = sourceFile)
-        Dim model = MemoryDB.Instance.CompilationItem.GetSemanticModel(sourceTree)
         Dim si As ISymbol = Nothing
 
         Try
 
-            si = Await SymbolFinder.FindSymbolAtPositionAsync(model, offset, MSBuildWorkspace.Create())
+            For Each compilationItem In MemoryDB.Instance.CompilationItems
+
+                Dim model = compilationItem.GetSemanticModel(sourceTree)
+                si = Await SymbolFinder.FindSymbolAtPositionAsync(model, offset, MSBuildWorkspace.Create())
+
+                If si IsNot Nothing AndAlso 0 < si.Locations.Count AndAlso si.Locations(0).IsInSource Then
+                    Exit For
+                End If
+
+            Next
+
+
 
         Catch ex As AggregateException
 
@@ -81,8 +91,12 @@ Public Class MethodView
         If si.Kind = SymbolKind.Method Then
 
             Me.SelectedThumb = TryCast(TryCast(TryCast(texteditor1.Parent, DockPanel).Parent, Border).TemplatedParent, ResizableThumb)
-            Me.NextSourceFile = si.Locations(0).SourceTree.FilePath
+            Me.NextSourceFile = si.Locations(0).SourceTree?.FilePath
             Me.NextStartLength = si.Locations(0).SourceSpan.Start
+
+            If String.IsNullOrWhiteSpace(Me.NextSourceFile) OrElse Not File.Exists(Me.NextSourceFile) Then
+                Return
+            End If
 
             ' メソッド対象以外を右クリックした後（このタイミングでは、コンテキストメニュー非表示で OK なのだが）、
             ' メソッド対象を左クリックするだけで、コンテキストメニューが表示されてしまう現象の対応
@@ -157,9 +171,12 @@ Public Class MethodView
         newThumb.Width = 640
         newThumb.Height = 480
 
-        ' タイトルをセット 
+        ' タイトルをセット
         Dim textblock1 = TryCast(newThumb.Template.FindName("textblock1", newThumb), TextBlock)
-        textblock1.Text = $"{Path.GetFileName(sourceFile)}"
+        'textblock1.Text = $"{Path.GetDirectoryName(sourceFile)}/{Path.GetFileName(sourceFile)}"
+
+        Dim fi = New FileInfo(sourceFile)
+        textblock1.Text = $"{fi.Directory.Name}/{fi.Name}"
 
         ' 調査用
         'textblock1.Text = $"{sourceFile}"      
