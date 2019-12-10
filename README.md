@@ -18,8 +18,8 @@ DotFolit は、「VB.NET で作成された Windows フォーム アプリケー
 
 # ダウンロード
 
-2018/04/20 時点のビルド分（8.72 MB）  
-[DotFolit_20180420.zip](https://github.com/sutefu7/DotFolit/files/1932428/DotFolit_20180420.zip "DotFolit_20180420.zip")
+2019/12/11 時点のビルド分（8.72 MB）  
+[DotFolit_20191211.zip](https://github.com/sutefu7/DotFolit/files/3946388/DotFolit_20191211.zip "DotFolit_20191211.zip")
 
 
 # 開発環境＆動作環境
