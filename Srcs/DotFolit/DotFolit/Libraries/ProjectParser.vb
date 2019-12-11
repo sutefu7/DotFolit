@@ -215,6 +215,17 @@ Public Class ProjectParser
 
         Next
 
+        ' ProjectReference タグを取得
+        referenceElements = From x In element.Descendants(ns + "ProjectReference")
+                            Where x.HasAttributes AndAlso x.Attributes("Include").Any()
+
+        For Each referenceElement In referenceElements
+
+            Dim projectName = referenceElement.Descendants(ns + "Name").FirstOrDefault()
+            Yield projectName.Value
+
+        Next
+
     End Function
 
     Public Iterator Function GetSourceFiles(projectFile As String) As IEnumerable(Of String)
